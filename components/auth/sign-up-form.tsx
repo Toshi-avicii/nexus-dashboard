@@ -13,14 +13,10 @@ import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from '..
 import { CircleCheck, CircleX, Eye, EyeOff, KeyRound, Mail, Phone, Send, UserRound } from 'lucide-react';
 import clsx from 'clsx';
 import { Button } from '../ui/button';
-
-interface SignUpFormData {
-    username: string;
-    email: string;
-    phone: string;
-    // role: "user" | "admin";
-    password: string;
-}
+import { signUp } from '@/helpers/auth.helpers';
+import { useAppDispatch } from '@/store/reduxHooks';
+import { changeProfileWhenRegister } from '@/store/slices/profile.slice';
+import { SignUpFormData } from '@/types/auth.types';
 
 const signUpFormSchema = z.object({
     username: z.string().trim().min(3, 'Username must be at least 3 characters long').max(12, {
@@ -71,11 +67,13 @@ export const generatePasswordConditions = (password: string) => {
 
 function SignUpForm() {
     const router = useRouter();
+    const dispatch = useAppDispatch();
     const [formData] = useState<SignUpFormData>({
         email: '',
         password: '',
         username: '',
         phone: '',
+        role: 'user'
     });
 
     const [showPassword, setShowPassword] = useState(false);
@@ -91,8 +89,35 @@ function SignUpForm() {
         mode: "onTouched"
     });
 
+    const signUpMutation = useMutation({
+        mutationFn: signUp,
+        onSuccess: async (data) => {
+            if (data) {
+                const { data: result } = data;
+                dispatch(changeProfileWhenRegister({
+                    _id: result.data.user._id,
+                    dp: '',
+                    email: result.data.user.email,
+                    phone: result.data.user.phone,
+                    role: result.data.user.role,
+                    username: result.data.user.username
+                }));
+                router.replace('/dashboard');
+            }
+        },
+        onError: (err) => {
+            // toast.dismiss('loading-toast');
+            toast.error(err.message);
+        }
+    })
+
     const onSubmit = (data: z.infer<typeof signUpFormSchema>) => {
-        console.log({ data });
+        const dataToSend = {
+            ...data,
+            role: formData.role
+        }
+
+        signUpMutation.mutate(dataToSend);
     }
 
     return (

@@ -18,6 +18,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form'
+import { toast } from 'sonner';
 import { z } from 'zod';
 
 const signInFormSchema = z.object({
@@ -54,6 +55,9 @@ function SignIn() {
 
     const loginMutation = useMutation({
         mutationFn: login,
+        onMutate() {
+            toast.loading('Sending...', { id: 'loading-toast' });
+        },
         onSuccess: async(data) => {
             if(data) {
                 const { data: result } = data;
@@ -69,7 +73,8 @@ function SignIn() {
             }
         },
         onError: (err) => {
-            console.log(err);
+            toast.dismiss('loading-toast');
+            toast.error(err.message);
         }
     })
 

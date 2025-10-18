@@ -8,9 +8,12 @@ function DashboardPage() {
   const getUserDataQuery = useQuery({
     queryKey: ['get-me'],
     queryFn: async() => await getProfile()
-  })
+  });
+
   return (
-    <div>DashboardPage</div>
+    <div className='p-4'>
+      Dashboard
+    </div>
   )
 }
 
