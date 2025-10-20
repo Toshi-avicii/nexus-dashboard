@@ -32,6 +32,21 @@ export const login = async({ email, password }: SignInFormData) => {
     }
 }
 
+// logout user
+export const logout = async() => {
+    try {
+        const reqUrl = 'auth/logout';
+        const response = await api.post(reqUrl);
+        return response;
+    } catch(err) {
+         if (err instanceof AxiosError) {
+            throw new Error(err.response?.data?.message)
+        } else if (err instanceof Error) {
+            throw new Error(err.message);
+        }
+    }
+}
+
 // get user data
 export const getProfile = async() => {
     try {

@@ -218,7 +218,11 @@ function SignIn() {
                         />
 
                         <div className='font-quickSand mt-4'>
-                            <Button type="submit" disabled={!form.formState.isValid} className="w-full">
+                            <Button 
+                                type="submit" 
+                                disabled={!form.formState.isValid} 
+                                className="w-full cursor-pointer"
+                            >
                                 Login
                             </Button>
                         </div>

@@ -2,14 +2,13 @@
 
 import React from 'react'
 import { Sidebar, SidebarContent, SidebarGroup, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarMenuSub, SidebarMenuSubButton, SidebarMenuSubItem, useSidebar } from './ui/sidebar'
-import { LayoutDashboard, CircleUserRound, ChevronRight, ShoppingBag } from 'lucide-react'
+import { LayoutDashboard, CircleUserRound, ChevronRight, ShoppingBag, ShoppingBasket } from 'lucide-react'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './ui/collapsible';
 import Link from 'next/link';
 import clsx from 'clsx';
 
 function AppSidebar() {
     const { open } = useSidebar();
-    console.log({ open });
     const items = [
         {
             title: "Dashboard",
@@ -21,9 +20,9 @@ function AppSidebar() {
             }
         },
         {
-            title: "Profile",
-            url: "/profile",
-            icon: CircleUserRound,
+            title: "Products",
+            url: "/products",
+            icon: ShoppingBasket,
             items: [{
                 title: '',
                 url: ''
