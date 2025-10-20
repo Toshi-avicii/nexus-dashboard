@@ -68,7 +68,8 @@ function SignIn() {
                     phone: result.data.user.phone,
                     role: result.data.user.role,
                     username: result.data.user.username
-                }));         
+                }));        
+                toast.dismiss("loading-toast"); 
                 router.replace('/dashboard');
             }
         },
