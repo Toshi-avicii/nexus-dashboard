@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import StoreProvider from "@/components/StoreProvider";
 import QueryProvider from "@/components/QueryProvider";
+import { Toaster } from "sonner";
 
 const quickSand = Quicksand({
   variable: "--font-quicksand",
@@ -37,6 +38,7 @@ export default function RootLayout({
           <StoreProvider>
             <QueryProvider>
               {children}
+              <Toaster richColors />
             </QueryProvider>
           </StoreProvider>
         </ThemeProvider>

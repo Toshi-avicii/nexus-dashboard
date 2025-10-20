@@ -2,22 +2,24 @@
 
 import { generatePasswordConditions } from '@/components/auth/sign-up-form';
 import { Button } from '@/components/ui/button'
-import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
-import { Input } from '@/components/ui/input'
+import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Field, FieldLabel } from '@/components/ui/field'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group';
+import { login } from '@/helpers/auth.helpers';
+import { useAppDispatch } from '@/store/reduxHooks';
+import { saveToken } from '@/store/slices/auth.slice';
+import { changeProfileWhenSignIn } from '@/store/slices/profile.slice';
+import { SignInFormData } from '@/types/auth.types';
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useMutation } from '@tanstack/react-query';
 import clsx from 'clsx';
 import { CircleCheck, CircleX, Eye, EyeOff, KeyRound, Mail } from 'lucide-react';
 import Link from 'next/link'
+import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form'
+import { toast } from 'sonner';
 import { z } from 'zod';
-
-interface SignInFormData {
-    email: string;
-    password: string;
-}
 
 const signInFormSchema = z.object({
     email: z.string().trim().email('Email must be valid'),
@@ -33,6 +35,8 @@ const signInFormSchema = z.object({
 });
 
 function SignIn() {
+    const dispatch = useAppDispatch();
+    const router = useRouter();
     const [formData] = useState<SignInFormData>({
         email: '',
         password: ''
@@ -49,8 +53,34 @@ function SignIn() {
         mode: "onTouched"
     });
 
+    const loginMutation = useMutation({
+        mutationFn: login,
+        onMutate() {
+            toast.loading('Sending...', { id: 'loading-toast' });
+        },
+        onSuccess: async(data) => {
+            if(data) {
+                const { data: result } = data;
+                dispatch(changeProfileWhenSignIn({
+                    _id: result.data.user._id,
+                    dp: '',
+                    email: result.data.user.email,
+                    phone: result.data.user.phone,
+                    role: result.data.user.role,
+                    username: result.data.user.username
+                }));        
+                toast.dismiss("loading-toast"); 
+                router.replace('/dashboard');
+            }
+        },
+        onError: (err) => {
+            toast.dismiss('loading-toast');
+            toast.error(err.message);
+        }
+    })
+
     const onSubmit = (data: z.infer<typeof signInFormSchema>) => {
-        console.log({ data });
+        loginMutation.mutate(data);
     }
 
     return (
