@@ -7,6 +7,7 @@ import clsx from "clsx";
 import { SidebarTrigger } from "./ui/sidebar";
 import { motion, useMotionValueEvent, useScroll } from 'motion/react'
 import { useState } from "react";
+import ProfileDropdown from "./ProfileDropdown";
 
 function Navbar() {
     const { setTheme, theme } = useTheme();
@@ -36,6 +37,7 @@ function Navbar() {
 
             {/* misc. */}
             <div className="flex gap-2 flex-[2] lg:flex-1 items-center justify-end">
+                 <ProfileDropdown />
                 <SidebarTrigger />
                 <Button
                     className="bg-transparent shadow-none hover:bg-transparent"
@@ -54,6 +56,7 @@ function Navbar() {
                         className={clsx("transition-all text-black", (theme === 'light' || theme === 'system') ? 'inline-block' : 'hidden')}
                     />
                 </Button>
+               
             </div>
         </motion.div>
     )
