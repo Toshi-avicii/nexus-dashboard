@@ -23,10 +23,16 @@ function AppSidebar() {
             title: "Products",
             url: "/products",
             icon: ShoppingBasket,
-            items: [{
-                title: '',
-                url: ''
-            }]
+            items: [
+                {
+                    title: 'Create',
+                    url: '/products/create'
+                },
+                {
+                    title: 'List',
+                    url: '/products/list'
+                }
+            ]
         }
     ];
 
@@ -71,7 +77,7 @@ function AppSidebar() {
                                                                             <SidebarMenuSubItem key={index}>
                                                                                 <SidebarMenuSubButton asChild>
                                                                                     <Link href={entry.url} className="flex items-center">
-                                                                                        <span className='font-quickSand'>{entry.title}    
+                                                                                        <span className='font-quickSand'>{entry.title}
                                                                                         </span>
                                                                                     </Link>
                                                                                 </SidebarMenuSubButton>
