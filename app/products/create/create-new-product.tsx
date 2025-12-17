@@ -18,6 +18,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { MetaField, OptionField, VariantField } from './others';
+import { createProduct } from '@/helpers/product.helpers';
 
 type SelectedProduct = 'clothing' | 'furniture' | 'other' | 'electronics';
 type SelectedStatus = 'draft' | 'published';
@@ -73,10 +74,11 @@ const metaFieldSchema = z.object({
 export const newProductFormSchema = z.object({
     // category: z.array(z.string()).min(1, { error: "At least 1 category is mandatory" }).max(10, { error: "Cannot have more than 10 categories" }),
     discount: z.number().min(0, { error: "Discount cannot be negative" }),
-    images: z.union([
-        z.array(z.string()),
-        z.array(z.instanceof(File))
-    ]),
+    // images: z.union([
+    //     z.array(z.string()),
+    //     z.array(z.instanceof(File))
+    // ]),
+    images: z.array(z.instanceof(File)),
     isActive: z.boolean(),
     metaFields: z.array(metaFieldSchema),
     name: z.string().min(3, { error: 'Name is short' }).max(100, { error: 'Name cannot be longer' }),
@@ -117,12 +119,14 @@ function CreateNewProduct() {
         mode: "all"
     });
 
-    const createProduct = (data: z.infer<typeof newProductFormSchema>) => {
-        console.log({
+    const createNewProduct = (data: z.infer<typeof newProductFormSchema>) => {
+        const dataToBeSent = {
             ...data,
             productType: selectedProduct,
             productStatus: selectedProductStatus
-        })
+        }
+
+        createProduct(dataToBeSent);
     }
 
     return (
@@ -232,7 +236,7 @@ function CreateNewProduct() {
                             <form
                                 autoComplete='off'
                                 className='font-quickSand flex flex-col gap-y-4'
-                                onSubmit={form.handleSubmit(createProduct)}
+                                onSubmit={form.handleSubmit(createNewProduct)}
                             >
                                 <Card className='p-0'>
                                     <Accordion

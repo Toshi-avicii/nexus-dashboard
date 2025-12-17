@@ -26,11 +26,13 @@ export type NewProduct = {
     discount: number;
     stock: number;
     // category: string[];
-    images: string[];
+    images: File[];
     isActive: boolean;
     variants: Variant[];
     options: ProductOption[];
     metaFields: MetaField[];
     description?: string | undefined;
 }
+
+export type ProductStatus = 'draft' | 'published';
 
