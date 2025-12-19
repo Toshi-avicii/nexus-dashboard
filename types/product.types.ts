@@ -25,7 +25,7 @@ export type NewProduct = {
     price: number;
     discount: number;
     stock: number;
-    // category: string[];
+    category: string[];
     images: File[];
     isActive: boolean;
     variants: Variant[];

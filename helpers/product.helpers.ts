@@ -19,7 +19,8 @@ export async function createProduct(createProductData: NewProduct & { productSta
             stock: createProductData.stock,
             variants: createProductData.variants,
             description: createProductData.description,
-            productStatus: createProductData.productStatus
+            productStatus: createProductData.productStatus,
+            category: createProductData.category
         }
 
         // product json
