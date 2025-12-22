@@ -396,7 +396,7 @@ function CreateNewProduct() {
                                                                             aria-invalid={fieldState.invalid}
                                                                             placeholder="Enter product name"
                                                                             autoComplete="off"
-                                                                            className="w-full max-w-full min-w-0 overflow-hidden"
+                                                                            className="text-xs font-semibold w-full max-w-full min-w-0 overflow-hidden"
                                                                         />
 
                                                                         {/* {fieldState.isTouched && ( */}
@@ -553,7 +553,7 @@ function CreateNewProduct() {
                                                                         placeholder={`Product description for ${form.watch('name')}`}
                                                                         id="message"
                                                                         aria-invalid={fieldState.invalid}
-                                                                        className={clsx(fieldState.invalid && 'border border-red-500')}
+                                                                        className={clsx('text-xs font-medium', fieldState.invalid && 'border border-red-500')}
                                                                     />
                                                                 </div>
                                                             )

@@ -74,8 +74,10 @@ function SignIn() {
             }
         },
         onError: (err) => {
-            toast.dismiss('loading-toast');
-            toast.error(err.message);
+            if(err instanceof Error) {
+                toast.dismiss('loading-toast');
+                toast.error(err.message);
+            }
         }
     })
 

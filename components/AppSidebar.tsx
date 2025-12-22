@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { Sidebar, SidebarContent, SidebarGroup, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarMenuSub, SidebarMenuSubButton, SidebarMenuSubItem, useSidebar } from './ui/sidebar'
-import { LayoutDashboard, CircleUserRound, ChevronRight, ShoppingBag, ShoppingBasket } from 'lucide-react'
+import { LayoutDashboard, CircleUserRound, ChevronRight, ShoppingBag, ShoppingBasket, ClipboardList } from 'lucide-react'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './ui/collapsible';
 import Link from 'next/link';
 import clsx from 'clsx';
@@ -31,6 +31,21 @@ function AppSidebar() {
                 {
                     title: 'List',
                     url: '/products/list'
+                }
+            ]
+        },
+        {
+            title: "Category",
+            url: "/category",
+            icon: ClipboardList,
+            items: [
+                {
+                    title: 'Create',
+                    url: '/category/create'
+                },
+                {
+                    title: 'List',
+                    url: '/category/list'
                 }
             ]
         }
