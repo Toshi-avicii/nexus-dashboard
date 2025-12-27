@@ -1,12 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { deleteCategory } from "@/helpers/category.helpers";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { deleteCategory, getCategoryById } from "@/helpers/category.helpers";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ColumnDef } from "@tanstack/react-table";
 import { ChevronDown, ChevronUp, Pencil, Trash } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import CategoryForm from "../category-form";
 
 type Category = {
     _id: string;
@@ -39,18 +40,34 @@ function RowAction({ categoryRow }: { categoryRow: Category }) {
         },
     });
 
+    const { isLoading, isError, data, error, refetch, isFetched, isFetching } = useQuery({
+        queryKey: ['category', categoryRow._id],
+        queryFn: () => getCategoryById(categoryRow._id),
+        enabled: false
+    });
+
+    useEffect(() => {
+        const close = () => setDialogType(null);
+        window.addEventListener("category:update:success", close);
+
+        return () =>
+            window.removeEventListener("category:update:success", close);
+    }, []);
+
+
     return (
         <Dialog open={dialogType !== null} onOpenChange={(open) => !open && setDialogType(null)}>
             <div className='space-x-4'>
                 <DialogTrigger asChild>
                     <Tooltip>
                         <TooltipTrigger asChild>
-                            <Button 
+                            <Button
                                 onClick={() => {
                                     setDialogType("edit");
-                                }} 
-                                size="sm" 
-                                variant="secondary" 
+                                    refetch();
+                                }}
+                                size="sm"
+                                variant="secondary"
                                 className='cursor-pointer'
                             >
                                 <Pencil />
@@ -106,6 +123,33 @@ function RowAction({ categoryRow }: { categoryRow: Category }) {
                 dialogType === "edit" && (
                     <DialogContent>
                         <DialogHeader>Edit Category</DialogHeader>
+                        {
+                            (isLoading || isFetching) && (
+                                <p>Loading...</p>
+                            )
+                        }
+                        {
+                            isError && (
+                                <p>{error.message}</p>
+                            )
+                        }
+                        {
+                            (data && isFetched && !isFetching) && (
+                                <CategoryForm
+                                    action="edit"
+                                    key={JSON.stringify({
+                                        description: data?.data.data.description,
+                                        name: data?.data.data.name,
+                                        id: data?.data.data._id
+                                    })}
+                                    category={{
+                                        description: data?.data.data.description,
+                                        name: data?.data.data.name,
+                                        id: data?.data.data._id
+                                    }}
+                                />
+                            )
+                        }
                     </DialogContent>
                 )
             }
@@ -149,4 +193,3 @@ export const columns: ColumnDef<Category>[] = [
         }
     }
 ]
-

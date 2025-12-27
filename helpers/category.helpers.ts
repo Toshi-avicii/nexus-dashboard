@@ -9,7 +9,8 @@ export const createCategory = async(data: NewCategory) => {
         return response;
     } catch(err) {
         if(err instanceof AxiosError) {
-            throw new Error(err.response?.data.message);
+            console.log(err);
+            throw new Error(err.response?.data.error.message);
         } else if(err instanceof Error) {
             throw new Error(err.message);
         }
@@ -23,7 +24,35 @@ export const getCategories = async() => {
         return response;
     } catch(err) {
         if(err instanceof AxiosError) {
-            throw new Error(err.response?.data.message);
+            throw new Error(err.response?.data.error.message);
+        } else if(err instanceof Error) {
+            throw new Error(err.message);
+        }
+    }
+}
+
+export const getCategoryById = async(categoryId: string) => {
+    try {
+        const reqUrl = `categories/${categoryId}`;
+        const response = await api.get(reqUrl);
+        return response;
+    } catch(err) {
+        if(err instanceof AxiosError) {
+            throw new Error(err.response?.data.error.message);
+        } else if(err instanceof Error) {
+            throw new Error(err.message);
+        }
+    }
+}
+
+export const updateCategoryById = async(categoryId: string, data: NewCategory) => {
+    try {
+        const reqUrl = `categories/${categoryId}`;
+        const response = await api.put(reqUrl, data);
+        return response;
+    } catch(err) {
+        if(err instanceof AxiosError) {
+            throw new Error(err.response?.data.error.message);
         } else if(err instanceof Error) {
             throw new Error(err.message);
         }
@@ -37,7 +66,7 @@ export const deleteCategory = async(categoryId: string) => {
         return response;
     } catch(err) {
         if(err instanceof AxiosError) {
-            throw new Error(err.response?.data.message);
+            throw new Error(err.response?.data.error.message);
         } else if(err instanceof Error) {
             throw new Error(err.message);
         }
