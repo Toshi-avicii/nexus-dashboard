@@ -10,7 +10,7 @@ function AppLayout({ children }: AppLayoutProps) {
   return (
     <SidebarProvider>
       <AppSidebar />
-      <SidebarInset>
+      <SidebarInset className="min-w-0 overflow-hidden">
         <main className="w-full">
           <Navbar />
           {children}

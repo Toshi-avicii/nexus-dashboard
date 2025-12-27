@@ -18,6 +18,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { MetaField, OptionField, VariantField } from './others';
+import { createProduct } from '@/helpers/product.helpers';
+import { useMutation } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
 type SelectedProduct = 'clothing' | 'furniture' | 'other' | 'electronics';
 type SelectedStatus = 'draft' | 'published';
@@ -71,12 +74,9 @@ const metaFieldSchema = z.object({
 })
 
 export const newProductFormSchema = z.object({
-    // category: z.array(z.string()).min(1, { error: "At least 1 category is mandatory" }).max(10, { error: "Cannot have more than 10 categories" }),
+    category: z.array(z.string()).min(1, { error: "At least 1 category is mandatory" }).max(10, { error: "Cannot have more than 10 categories" }),
     discount: z.number().min(0, { error: "Discount cannot be negative" }),
-    images: z.union([
-        z.array(z.string()),
-        z.array(z.instanceof(File))
-    ]),
+    images: z.array(z.instanceof(File)),
     isActive: z.boolean(),
     metaFields: z.array(metaFieldSchema),
     name: z.string().min(3, { error: 'Name is short' }).max(100, { error: 'Name cannot be longer' }),
@@ -92,18 +92,17 @@ function CreateNewProduct() {
     const [selectedProduct, setSelectedProduct] = useState<SelectedProduct | null>(null);
     const [selectedProductStatus, setSelectedProductStatus] = useState<SelectedStatus>('draft');
     const [formData] = useState<Omit<NewProduct, 'productType'>>({
-        // category: [],
-        discount: 0, // done
-        images: [], // done
+        category: ["68dd034b175d97c29b949831"],
+        discount: 0,
+        images: [],
         isActive: true,
-        metaFields: [], // done
-        name: '', // done
-        options: [], // these are options for the main product - done
-        price: 0, // done
-        // productType: selectedProduct, // done
-        stock: 0, // done
-        variants: [], // these are variants of the original product
-        description: '' // done
+        metaFields: [],
+        name: '',
+        options: [],
+        price: 0,
+        stock: 0,
+        variants: [],
+        description: ''
     });
 
     const [inputValue, setInputValue] = useState("");
@@ -117,12 +116,32 @@ function CreateNewProduct() {
         mode: "all"
     });
 
-    const createProduct = (data: z.infer<typeof newProductFormSchema>) => {
-        console.log({
+    const createProductMutation = useMutation({
+        mutationFn: createProduct,
+        onMutate() {
+            toast.loading('Creating...', { id: 'loading-toast' });
+        },
+        onSuccess: async (data) => {
+            if (data) {
+                console.log({ data });
+                toast.dismiss("loading-toast");
+                toast.success("Product successfully created")
+            }
+        },
+        onError: (err) => {
+            toast.dismiss('loading-toast');
+            toast.error(err.message);
+        }
+    })
+
+    function createNewProduct(data: z.infer<typeof newProductFormSchema>) {
+        const dataToBeSent = {
             ...data,
             productType: selectedProduct,
-            productStatus: selectedProductStatus
-        })
+            productStatus: selectedProductStatus,
+        }
+
+        createProductMutation.mutate(dataToBeSent);
     }
 
     return (
@@ -176,7 +195,7 @@ function CreateNewProduct() {
                                     <DropdownMenuGroup>
                                         {[
                                             { id: 1, text: "Draft", value: "draft" },
-                                            { id: 2, text: "Publish", value: "publish" },
+                                            { id: 2, text: "Publish", value: "published" },
                                         ].map((item) => (
                                             <DropdownMenuItem
                                                 key={item.id}
@@ -193,8 +212,8 @@ function CreateNewProduct() {
                         </div>
                     </TooltipTrigger>
 
-                    <TooltipContent 
-                        className={clsx(selectedProductStatus === 'draft' ? 'bg-red-400 text-white' : 'bg-green-600 text-white')} 
+                    <TooltipContent
+                        className={clsx(selectedProductStatus === 'draft' ? 'bg-red-400 text-white' : 'bg-green-600 text-white')}
                         arrowClassName={clsx(selectedProductStatus === 'draft' ? 'bg-red-400 fill-red-400' : 'bg-green-600 text-white fill-green-600')}
                     >
                         {selectedProductStatus === "draft" ? (
@@ -232,7 +251,7 @@ function CreateNewProduct() {
                             <form
                                 autoComplete='off'
                                 className='font-quickSand flex flex-col gap-y-4'
-                                onSubmit={form.handleSubmit(createProduct)}
+                                onSubmit={form.handleSubmit(createNewProduct)}
                             >
                                 <Card className='p-0'>
                                     <Accordion
@@ -377,7 +396,7 @@ function CreateNewProduct() {
                                                                             aria-invalid={fieldState.invalid}
                                                                             placeholder="Enter product name"
                                                                             autoComplete="off"
-                                                                            className="w-full max-w-full min-w-0 overflow-hidden"
+                                                                            className="text-xs font-semibold w-full max-w-full min-w-0 overflow-hidden"
                                                                         />
 
                                                                         {/* {fieldState.isTouched && ( */}
@@ -534,7 +553,7 @@ function CreateNewProduct() {
                                                                         placeholder={`Product description for ${form.watch('name')}`}
                                                                         id="message"
                                                                         aria-invalid={fieldState.invalid}
-                                                                        className={clsx(fieldState.invalid && 'border border-red-500')}
+                                                                        className={clsx('text-xs font-medium', fieldState.invalid && 'border border-red-500')}
                                                                     />
                                                                 </div>
                                                             )
