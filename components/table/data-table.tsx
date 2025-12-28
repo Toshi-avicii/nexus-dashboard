@@ -24,7 +24,7 @@ type DataTableComponent = (<TData extends WithId>(
     Search: React.FC
     Table: React.FC
     Pagination: React.FC
-    BulkDelete: React.FC<{ onDelete: (ids: string[]) => void }>
+    BulkDelete: React.FC<{ onDelete: (selectedIds: string[]) => void; }>
 }
 
 const DataTableBase = <TData extends WithId>({
