@@ -1,11 +1,11 @@
 'use client';
 
-import { DataTable } from '@/components/table/data-table'
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
 import { getCategories } from '@/helpers/category.helpers';
 import { useQuery } from '@tanstack/react-query';
 import React from 'react'
 import { columns } from './category-table-columns';
+import { DataTable } from '@/components/table/data-table';
 
 function CategoryListPage() {
 
@@ -33,10 +33,14 @@ function CategoryListPage() {
       </Breadcrumb>
 
       <div className='my-4'>
-        <DataTable
-          columns={columns}
-          data={categoryListQuery.data?.data?.data || []}
-        />
+        <DataTable columns={columns} data={categoryListQuery.data?.data?.data || []}>
+          <DataTable.Toolbar>
+            <DataTable.Search />
+            <DataTable.BulkDelete onDelete={() => {}} />
+          </DataTable.Toolbar>
+          <DataTable.Table />
+          <DataTable.Pagination />
+        </DataTable>
       </div>
     </div>
   )
