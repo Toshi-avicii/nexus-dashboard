@@ -14,7 +14,7 @@ type ProductDetails = {
     price: number;
     discount: number;
     stock: number;
-    // category: string[];
+    category: string[];
     images: string[] | File[];
     isActive: boolean;
     variants: {
@@ -48,7 +48,7 @@ function generateInrAmount(amount: number): string {
 }
 
 function ProductDetail({
-    // category,
+    category,
     discount,
     images,
     isActive,

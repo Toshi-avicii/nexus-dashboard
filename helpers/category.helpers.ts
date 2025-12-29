@@ -72,3 +72,21 @@ export const deleteCategory = async(categoryId: string) => {
         }
     }
 }
+
+export const deleteBulkCategories = async(categoryIds: string[]) => {
+    try {
+        const reqUrl = `categories`;
+        const result = await api.delete(reqUrl, {
+            data: {
+                categoryIds
+            }
+        });
+        return result;
+    } catch(err) {
+        if(err instanceof AxiosError) {
+            throw new Error(err.response?.data.error.message);
+        } else if(err instanceof Error) {
+            throw new Error(err.message);
+        }
+    }
+}

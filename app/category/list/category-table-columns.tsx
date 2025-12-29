@@ -8,6 +8,7 @@ import { ChevronDown, ChevronUp, Pencil, Trash } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import CategoryForm from "../category-form";
+import { Checkbox } from "@/components/ui/checkbox";
 
 type Category = {
     _id: string;
@@ -158,6 +159,30 @@ function RowAction({ categoryRow }: { categoryRow: Category }) {
 }
 
 export const columns: ColumnDef<Category>[] = [
+    {
+        id: "select",
+        header: ({ table }) => (
+            <Checkbox
+                checked={
+                    table.getIsAllPageRowsSelected() ||
+                    (table.getIsSomePageRowsSelected() && "indeterminate")
+                }
+                onCheckedChange={(value) =>
+                    table.toggleAllPageRowsSelected(!!value)
+                }
+                aria-label="Select all"
+            />
+        ),
+        cell: ({ row }) => (
+            <Checkbox
+                checked={row.getIsSelected()}
+                onCheckedChange={(value) => row.toggleSelected(!!value)}
+                aria-label="Select row"
+            />
+        ),
+        enableSorting: false,
+        enableHiding: false,
+    },
     {
         id: "name",
         accessorKey: 'name',

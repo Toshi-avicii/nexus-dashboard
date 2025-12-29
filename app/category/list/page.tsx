@@ -1,13 +1,16 @@
 'use client';
 
-import { DataTable } from '@/components/table/data-table'
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
-import { getCategories } from '@/helpers/category.helpers';
-import { useQuery } from '@tanstack/react-query';
+import { deleteBulkCategories, getCategories } from '@/helpers/category.helpers';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import React from 'react'
 import { columns } from './category-table-columns';
+import { DataTable } from '@/components/table/data-table';
+import { toast } from 'sonner';
+import { useDataTable } from '@/components/table/data-table-context';
 
 function CategoryListPage() {
+  const queryClient = useQueryClient();
 
   const categoryListQuery = useQuery({
     queryKey: ['get-category-list'],
@@ -17,6 +20,24 @@ function CategoryListPage() {
     },
   });
 
+  const bulkCategoryDeleteMutation = useMutation({
+    mutationFn: deleteBulkCategories,
+    onMutate() {
+      toast.loading('Sending...', { id: 'category-delete-toast' });
+    },
+    onSuccess(data) {
+      if (data) {
+        console.log({ data });
+        toast.dismiss('category-delete-toast');
+        toast.success(data.data.message);
+        queryClient.invalidateQueries({ queryKey: ['get-category-list'] });
+      }
+    },
+    onError(error) {
+      toast.dismiss('category-delete-toast');
+      toast.error(error.message);
+    },
+  })
 
   return (
     <div className='p-4'>
@@ -33,10 +54,16 @@ function CategoryListPage() {
       </Breadcrumb>
 
       <div className='my-4'>
-        <DataTable
-          columns={columns}
-          data={categoryListQuery.data?.data?.data || []}
-        />
+        <DataTable columns={columns} data={categoryListQuery.data?.data?.data || []}>
+          <DataTable.Toolbar>
+            <DataTable.Search />
+            <DataTable.BulkDelete onDelete={(ids: string[]) => {
+              bulkCategoryDeleteMutation.mutate(ids);
+            }} />
+          </DataTable.Toolbar>
+          <DataTable.Table />
+          <DataTable.Pagination />
+        </DataTable>
       </div>
     </div>
   )
