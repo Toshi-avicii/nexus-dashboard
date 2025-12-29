@@ -19,8 +19,11 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { MetaField, OptionField, VariantField } from './others';
 import { createProduct } from '@/helpers/product.helpers';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { getCategories } from '@/helpers/category.helpers';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { FetchedCategory, NewCategory } from '@/types/category.types';
 
 type SelectedProduct = 'clothing' | 'furniture' | 'other' | 'electronics';
 type SelectedStatus = 'draft' | 'published';
@@ -134,6 +137,14 @@ function CreateNewProduct() {
         }
     })
 
+    const categoryListQuery = useQuery({
+        queryKey: ['get-category-list'],
+        queryFn: async () => {
+            const data = await getCategories();
+            return data;
+        },
+    });
+
     function createNewProduct(data: z.infer<typeof newProductFormSchema>) {
         const dataToBeSent = {
             ...data,
@@ -232,7 +243,7 @@ function CreateNewProduct() {
                     >
                         <Card className='p-4 flex-[3] overflow-hidden'>
                             <ProductDetail
-                                // category={form.watch('category')}
+                                category={form.watch('category')}
                                 discount={form.watch('discount')}
                                 images={form.watch('images')}
                                 isActive={form.watch('isActive')}
@@ -457,6 +468,59 @@ function CreateNewProduct() {
                                                         }}
                                                     />
 
+                                                </FieldGroup>
+
+                                                {/* category */}
+                                                <FieldGroup className='font-quickSand p-4 min-w-0 overflow-hidden'>
+                                                    <div
+                                                        className='flex flex-col'
+                                                    >
+                                                        <FieldLabel htmlFor='type'>
+                                                            Category
+                                                        </FieldLabel>
+                                                        <Controller
+                                                            control={form.control}
+                                                            name='category'
+                                                            render={({ field, fieldState }) => {
+                                                                return (
+                                                                    <div>
+                                                                        <Select
+                                                                            onValueChange={(value) => {
+                                                                                const selection = [];
+                                                                                selection.push(value);
+                                                                                form.setValue('category', selection);
+                                                                            }}
+
+                                                                        >
+                                                                            <SelectTrigger
+                                                                                className='border border-neutral-200 dark:border-zinc-700 py-2 rounded-md text-start px-2 mt-2 w-full'
+                                                                                id='type'
+                                                                            >
+                                                                                <SelectValue placeholder="Choose a category" />
+                                                                            </SelectTrigger>
+                                                                            <SelectContent>
+                                                                                {
+                                                                                    (categoryListQuery.data?.data?.data as FetchedCategory[]).map(category => (
+                                                                                        <SelectItem
+                                                                                            key={category._id}
+                                                                                            value={category._id}
+                                                                                        >
+                                                                                            {category.name}
+                                                                                        </SelectItem>
+                                                                                    ))
+                                                                                }
+                                                                            </SelectContent>
+                                                                        </Select>
+                                                                        <div>
+                                                                            {fieldState.invalid && <CircleX />}
+                                                                            {fieldState.error && <FieldError errors={[fieldState.error]} />}
+
+                                                                        </div>
+                                                                    </div>
+                                                                )
+                                                            }}
+                                                        />
+                                                    </div>
                                                 </FieldGroup>
 
                                                 {/* options */}
