@@ -36,3 +36,14 @@ export type NewProduct = {
 
 export type ProductStatus = 'draft' | 'published';
 
+export type FetchedProduct = Omit<NewProduct, 'images' | 'category'> & {
+    _id: string;
+    images: string[];
+    category: {
+        _id: string;
+        name: string;
+    }[];
+    status: ProductStatus;
+    createdAt: string;
+    updatedAt: string;
+}

@@ -42,3 +42,17 @@ export async function createProduct(createProductData: NewProduct & { productSta
         }
     }
 }
+
+export async function getProducts() {
+    try {
+        const reqUrl = `products`;
+        const result = await api.get(reqUrl);
+        return result;
+    } catch (err) {
+        if (err instanceof AxiosError) {
+            throw new Error(err.response?.data.message);
+        } else if (err instanceof Error) {
+            throw new Error(err.message);
+        }
+    }
+}

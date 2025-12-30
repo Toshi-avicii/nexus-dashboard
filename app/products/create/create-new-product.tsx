@@ -95,7 +95,7 @@ function CreateNewProduct() {
     const [selectedProduct, setSelectedProduct] = useState<SelectedProduct | null>(null);
     const [selectedProductStatus, setSelectedProductStatus] = useState<SelectedStatus>('draft');
     const [formData] = useState<Omit<NewProduct, 'productType'>>({
-        category: ["68dd034b175d97c29b949831"],
+        category: [],
         discount: 0,
         images: [],
         isActive: true,
@@ -126,9 +126,9 @@ function CreateNewProduct() {
         },
         onSuccess: async (data) => {
             if (data) {
-                console.log({ data });
                 toast.dismiss("loading-toast");
                 toast.success("Product successfully created")
+                form.reset();
             }
         },
         onError: (err) => {
