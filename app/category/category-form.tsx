@@ -40,6 +40,9 @@ function CategoryForm({ action, category }: { action: FormType, category?: Exist
         },
         onSuccess: async (data) => {
             if (data) {
+                queryClient.invalidateQueries({
+                    queryKey: ["'get-category-list"]
+                })
                 toast.dismiss("loading-toast");
                 toast.success("Category successfully created");
                 form.setValue("name", '');

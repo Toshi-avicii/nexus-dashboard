@@ -19,8 +19,11 @@ export type MetaField = {
     type: string;
 }
 
+export type SelectedProduct = 'clothing' | 'furniture' | 'other' | 'electronics';
+export type SelectedStatus = 'draft' | 'published';
+
 export type NewProduct = {
-    productType: "clothing" | "electronics" | "furniture" | "other" | null;
+    productType: SelectedProduct | null;
     name: string;
     price: number;
     discount: number;

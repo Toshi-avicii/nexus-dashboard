@@ -13,46 +13,70 @@ import Image from "next/image";
 import { generateInrAmount } from "@/utils/generateInrAmount";
 import clsx from "clsx";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import CreateNewProduct from "../create/create-new-product";
+import { NewProductForm } from "@/components/NewProductForm";
 
 function RowAction({ productRow }: { productRow: FetchedProduct }) {
-    const [dialogType, setDialogType] = useState<'edit' | 'delete' | null>(null);
+    const [dialogType, setDialogType] = useState<'view' | 'edit' | 'delete' | null>(null);
     const queryClient = useQueryClient();
-
-
     return (
         <Dialog open={dialogType !== null} onOpenChange={(open) => !open && setDialogType(null)}>
-            <div className='space-x-4'>
+            <div className='space-x-4 flex items-center'>
+                <DialogTrigger asChild>
+                    <div className="flex gap-x-3 justify-start items-center">
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button 
+                                    onClick={() => setDialogType("view")}
+                                    variant="outline" 
+                                    type="button" 
+                                    size="icon-sm" 
+                                    className="cursor-pointer"
+                                >
+                                    <Eye size={12} />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                View Product
+                            </TooltipContent>
+                        </Tooltip>
+                    </div>
+                </DialogTrigger>
+
                 <DialogTrigger asChild>
                     <Tooltip>
                         <TooltipTrigger asChild>
-                            <Button
-                                size="sm"
-                                variant="secondary"
-                                className='cursor-pointer'
+                            <Button 
+                                onClick={() => setDialogType("edit")} 
+                                variant="secondary" 
+                                type="button" 
+                                size="icon-sm" 
+                                className="cursor-pointer"
                             >
-                                <Pencil />
+                                <Edit size={12} />
                             </Button>
                         </TooltipTrigger>
-                        <TooltipContent>Edit</TooltipContent>
+                        <TooltipContent>
+                            Edit Product
+                        </TooltipContent>
                     </Tooltip>
                 </DialogTrigger>
 
                 <DialogTrigger asChild>
                     <Tooltip>
                         <TooltipTrigger asChild>
-                            <Button
-                                onClick={() => {
-                                    setDialogType("delete");
-                                }}
-                                size="sm"
-                                variant="secondary"
-                                className='cursor-pointer bg-red-800 text-white hover:bg-red-900'
+                            <Button 
+                                onClick={() => setDialogType("delete")} 
+                                variant="destructive" 
+                                type="button"
+                                size="icon-sm" 
+                                className="cursor-pointer"
                             >
-                                <Trash />
+                                <Trash size={12} />
                             </Button>
                         </TooltipTrigger>
                         <TooltipContent>
-                            Delete
+                            Delete Product
                         </TooltipContent>
                     </Tooltip>
                 </DialogTrigger>
@@ -62,10 +86,10 @@ function RowAction({ productRow }: { productRow: FetchedProduct }) {
                 dialogType === 'delete' &&
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Delete Category</DialogTitle>
+                        <DialogTitle>Delete Product</DialogTitle>
                     </DialogHeader>
                     <div>
-                        <p>Are you sure you want to delete this category? All the products related to this category will also get moved to being uncategorized.</p>
+                        <p>Are you sure you want to delete this product?</p>
                     </div>
                     {/* dialog footer */}
                     <DialogFooter>
@@ -78,26 +102,14 @@ function RowAction({ productRow }: { productRow: FetchedProduct }) {
             }
 
             {
-                dialogType === "edit" && (
-                    <DialogContent>
-                        <DialogHeader>Edit Category</DialogHeader>
-                        {/* {
-                            (isLoading || isFetching) && (
-                                <p>Loading...</p>
-                            )
-                        }
-                        {
-                            isError && (
-                                <p>{error.message}</p>
-                            )
-                        }
-                        {
-                            (data && isFetched && !isFetching) && (
-                                <>
-                                    <p>Product Form</p>
-                                </>
-                            )
-                        } */}
+                (dialogType === "edit" || dialogType === 'view') && (
+                    <DialogContent className="max-h-10/12 flex flex-col overflow-y-scroll">
+                        <DialogHeader className="">
+                            <DialogTitle>
+                                {dialogType === "edit" ? "Edit" : "View"} Product
+                            </DialogTitle>
+                        </DialogHeader>
+                        <CreateNewProduct action={dialogType} productData={productRow} />
                     </DialogContent>
                 )
             }
@@ -292,38 +304,7 @@ export const productTableCols: ColumnDef<FetchedProduct>[] = [
             const product = row.original;
 
             return (
-                <div className="flex gap-x-3 justify-start items-center">
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                            <Button variant="outline" type="button" size="icon-sm" className="cursor-pointer">
-                                <Eye size={12} />
-                            </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                            View Product
-                        </TooltipContent>
-                    </Tooltip>
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                            <Button variant="secondary" type="button" size="icon-sm" className="cursor-pointer">
-                                <Edit size={12} />
-                            </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                            Edit Product
-                        </TooltipContent>
-                    </Tooltip>
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                            <Button variant="destructive" type="button" size="icon-sm" className="cursor-pointer">
-                                <Trash size={12} />
-                            </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                            Delete Product
-                        </TooltipContent>
-                    </Tooltip>
-                </div>
+                <RowAction productRow={product} />
             )
         }
     }
