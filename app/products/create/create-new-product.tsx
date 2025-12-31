@@ -36,37 +36,57 @@ const availableProductCategories = [
     },
 ];
 
-type CreateNewProductProps = {
-    action: "create" | "view" | "edit";
-    productData?: FetchedProduct;
+type Action = "create" | "view" | "edit";
+type CreateNewProductData = Omit<NewProduct, 'productType'>;
+
+function getInitialFormData(action: "create"): CreateNewProductData;
+function getInitialFormData(action: "edit" | "view", productData: FetchedProduct): FetchedProduct;
+function getInitialFormData(action: Action, productData?: FetchedProduct): CreateNewProductData | FetchedProduct {
+    if ((action === "edit" || action === "view") && productData) {
+        return productData!;
+    } else {
+        return {
+            category: [],
+            discount: 0,
+            images: [],
+            isActive: true,
+            metaFields: [],
+            name: '',
+            options: [],
+            price: 0,
+            stock: 0,
+            variants: [],
+            description: ''
+        }
+    }
 }
 
-function CreateNewProduct({ action, productData }: CreateNewProductProps) {
+function CreateNewProduct({ action, productData }: { action: Action, productData?: FetchedProduct }) {
     const [selectedProduct, setSelectedProduct] = useState<SelectedProduct | null>(null);
     const [selectedProductStatus, setSelectedProductStatus] = useState<SelectedStatus>('draft');
-    const [formData] = useState<Omit<NewProduct, 'productType'>>({
-        category: [],
-        discount: 0,
-        images: [],
-        isActive: true,
-        metaFields: [],
-        name: '',
-        options: [],
-        price: 0,
-        stock: 0,
-        variants: [],
-        description: ''
-    });
+    const isInReadOrEditView = ((action === "view" || action === "edit") && productData);
+    const [formData] = useState(
+        action === "create" ? getInitialFormData(action) : getInitialFormData(action, productData!)
+    );
 
     const form = useForm<z.infer<typeof newProductFormSchema>>({
         resolver: zodResolver(newProductFormSchema),
-        defaultValues: formData,
+        defaultValues: {
+            category: (isInReadOrEditView ? productData.category.map(item => item._id) : []),
+            discount: (isInReadOrEditView ? productData.discount : 0),
+            images: [],
+            isActive: (isInReadOrEditView ? productData.isActive : true),
+            metaFields: (isInReadOrEditView ? productData.metaFields : []),
+            name: (isInReadOrEditView ? productData.name : ''),
+            options: (isInReadOrEditView ? productData.options : []),
+            price: (isInReadOrEditView ? productData.price : 0),
+            stock: (isInReadOrEditView ? productData.stock : 0),
+            variants: (isInReadOrEditView ? productData.variants : []),
+            description: (isInReadOrEditView ? productData.description : '')
+        },
         mode: "all"
     });
 
-    console.log({
-        productData
-    })
     return (
         <div>
             <FormProvider {...form}>
@@ -174,25 +194,32 @@ function CreateNewProduct({ action, productData }: CreateNewProductProps) {
                                     description={form.watch('description')}
                                 />
                             </Card>
-                            <NewProductForm selectedProduct={selectedProduct} selectedProductStatus={selectedProductStatus} />
+                            <NewProductForm 
+                                selectedProduct={selectedProduct} 
+                                selectedProductStatus={selectedProductStatus} 
+                                action='create'
+                            />
                         </div>
                     )
                 }
 
                 {
                     ((action === "edit" || action === "view") && !productData) && (
-                        <NewProductForm 
-                            selectedProduct={selectedProduct} 
-                            selectedProductStatus={selectedProductStatus} 
+                        <NewProductForm
+                            selectedProduct={selectedProduct}
+                            selectedProductStatus={selectedProductStatus}
+                            action={action}
                         />
                     )
                 }
 
                 {
                     ((action === "edit" || action === "view") && productData) && (
-                        <NewProductForm 
-                            selectedProduct={productData.productType} 
-                            selectedProductStatus={productData.status} 
+                        <NewProductForm
+                            selectedProduct={productData.productType}
+                            selectedProductStatus={productData.status}
+                            productData={productData}
+                            action={action}
                         />
                     )
                 }

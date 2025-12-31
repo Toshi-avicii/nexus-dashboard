@@ -1,6 +1,6 @@
 import { getCategories } from "@/helpers/category.helpers";
 import { createProduct } from "@/helpers/product.helpers";
-import { NewProduct } from "@/types/product.types";
+import { FetchedProduct, NewProduct } from "@/types/product.types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
@@ -21,6 +21,7 @@ import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 import { Button } from "./ui/button";
+import Image from "next/image";
 
 type SelectedProduct = 'clothing' | 'furniture' | 'other' | 'electronics';
 type SelectedStatus = 'draft' | 'published';
@@ -28,6 +29,8 @@ type SelectedStatus = 'draft' | 'published';
 type NewProductFormProps = {
     selectedProduct: SelectedProduct | null;
     selectedProductStatus: SelectedStatus;
+    productData?: FetchedProduct;
+    action: "create" | "edit" | "view";
 }
 
 const variantSchema = z.object({
@@ -70,7 +73,7 @@ export const newProductFormSchema = z.object({
     description: z.string().optional()
 });
 
-export function NewProductForm({ selectedProduct, selectedProductStatus }: NewProductFormProps) {
+export function NewProductForm({ selectedProduct, selectedProductStatus, productData, action }: NewProductFormProps) {
     const [isPhotosAccordionOpen, setIsPhotosAccordionOpen] = useState(true);
     const [isInfoAccordionOpen, setIsInfoAccordionOpen] = useState(true);
     const [isPriceInfoAccordionOpen, setIsPriceInfoAccordionOpen] = useState(true);
@@ -139,91 +142,121 @@ export function NewProductForm({ selectedProduct, selectedProductStatus }: NewPr
                                 </h2>
                             </AccordionTrigger>
                             <AccordionContent className='pt-4'>
-                                <FieldGroup>
-                                    <Controller
-                                        name='images'
-                                        control={form.control}
-                                        render={({ field, fieldState }) => {
-                                            return (
-                                                <div className='w-full px-4 pb-4 '>
-                                                    <div className='relative min-h-64 border-2 rounded-md border-dashed dark:border-zinc-700 border-gray-300'>
-                                                        <Input
-                                                            accept="image/png, image/jpeg, image/jpg, image/gif"
-                                                            type='file'
-                                                            multiple
-                                                            ref={field.ref}
-                                                            onChange={(e) => {
-                                                                const files = Array.from(e.target.files ?? []);
-                                                                field.onChange(files);
-                                                                e.target.value = "";
-                                                            }}
-                                                            className={clsx('min-h-64 absolute z-[3] top-0 left-0 w-full opacity-0', fieldState.invalid && 'border-2 border-dashed border-red-700')}
-                                                        />
+                                {
+                                    (action === 'view' && productData) ? 
+                                        <div className="w-full px-4 pb-4">
+                                            <div className='relative min-h-64 border-2 rounded-md border-dashed dark:border-zinc-700 border-gray-300 grid grid-cols-3 gap-4 p-3'>
+                                                {
+                                                    productData.images.length > 0 ? productData.images.map((imgUrl, idx) => {
+                                                        return (
+                                                            <div className="flex rounded-md">
+                                                                <Image 
+                                                                    key={idx}
+                                                                    src={imgUrl}
+                                                                    width={100}
+                                                                    height={100}
+                                                                    alt={productData.name}
+                                                                    className="w-full rounded-sm object-cover"
+                                                                />
+                                                            </div>
+                                                        )
+                                                    }) : (
+                                                        <div className="w-full col-span-3 flex justify-center items-center">
+                                                            <p>No images uploaded</p>
+                                                        </div>
+                                                    ) 
+                                                }           
+                                            </div>
 
-                                                        {
-                                                            field.value.length > 0 ? (
-                                                                <div className='grid grid-cols-4 p-4 place-items-center gap-4'>
+                                        </div>
+                                    : (
+                                        <FieldGroup>
+                                                <Controller
+                                                    name='images'
+                                                    control={form.control}
+                                                    render={({ field, fieldState }) => {
+                                                        return (
+                                                            <div className='w-full px-4 pb-4 '>
+                                                                <div className='relative min-h-64 border-2 rounded-md border-dashed dark:border-zinc-700 border-gray-300'>
+                                                                    <Input
+                                                                        accept="image/png, image/jpeg, image/jpg, image/gif"
+                                                                        type='file'
+                                                                        multiple
+                                                                        ref={field.ref}
+                                                                        onChange={(e) => {
+                                                                            const files = Array.from(e.target.files ?? []);
+                                                                            field.onChange(files);
+                                                                            e.target.value = "";
+                                                                        }}
+                                                                        className={clsx('min-h-64 absolute z-[3] top-0 left-0 w-full opacity-0', fieldState.invalid && 'border-2 border-dashed border-red-700')}
+                                                                    />
+
                                                                     {
-                                                                        field.value.map((file, idx) => {
-                                                                            if (file instanceof File) {
-                                                                                const sizeInMB = ((file.size / 1024) / 1024).toFixed(2);
-                                                                                return (
-                                                                                    <div
-                                                                                        key={idx}
-                                                                                        className='p-2 rounded-md h-32 w-32 bg-neutral-100 dark:bg-zinc-700 text-gray-800 flex flex-col dark:text-gray-50 justify-center items-center gap-y-3 relative'
-                                                                                    >
-                                                                                        <p className='text-sm text-center'>{file.name}</p>
-                                                                                        <p>{sizeInMB}MB</p>
+                                                                        field.value.length > 0 ? (
+                                                                            <div className='grid grid-cols-4 p-4 place-items-center gap-4'>
+                                                                                {
+                                                                                    field.value.map((file, idx) => {
+                                                                                        if (file instanceof File) {
+                                                                                            const sizeInMB = ((file.size / 1024) / 1024).toFixed(2);
+                                                                                            return (
+                                                                                                <div
+                                                                                                    key={idx}
+                                                                                                    className='p-2 rounded-md h-32 w-32 bg-neutral-100 dark:bg-zinc-700 text-gray-800 flex flex-col dark:text-gray-50 justify-center items-center gap-y-3 relative'
+                                                                                                >
+                                                                                                    <p className='text-sm text-center'>{file.name}</p>
+                                                                                                    <p>{sizeInMB}MB</p>
 
-                                                                                        <div
-                                                                                            className='absolute -top-1 -right-2 h-5 w-5 rounded-full bg-orange-400 flex justify-center items-center text-white cursor-pointer z-10'
-                                                                                            onClick={(e: React.MouseEvent<HTMLElement>) => {
-                                                                                                const restFiles = field.value.filter((file, index) => {
-                                                                                                    return idx !== index;
-                                                                                                });
+                                                                                                    <div
+                                                                                                        className='absolute -top-1 -right-2 h-5 w-5 rounded-full bg-orange-400 flex justify-center items-center text-white cursor-pointer z-10'
+                                                                                                        onClick={(e: React.MouseEvent<HTMLElement>) => {
+                                                                                                            const restFiles = field.value.filter((file, index) => {
+                                                                                                                return idx !== index;
+                                                                                                            });
 
-                                                                                                if (restFiles[0] instanceof File) {
-                                                                                                    form.setValue('images', restFiles as File[])
-                                                                                                }
+                                                                                                            if (restFiles[0] instanceof File) {
+                                                                                                                form.setValue('images', restFiles as File[])
+                                                                                                            }
 
-                                                                                                if (restFiles.length === 0) {
-                                                                                                    form.setValue('images', [])
-                                                                                                }
+                                                                                                            if (restFiles.length === 0) {
+                                                                                                                form.setValue('images', [])
+                                                                                                            }
 
-                                                                                            }}
-                                                                                        >
-                                                                                            <X size={12} />
-                                                                                        </div>
-                                                                                    </div>
-                                                                                )
-                                                                            }
-                                                                        })
+                                                                                                        }}
+                                                                                                    >
+                                                                                                        <X size={12} />
+                                                                                                    </div>
+                                                                                                </div>
+                                                                                            )
+                                                                                        }
+                                                                                    })
+                                                                                }
+                                                                            </div>
+                                                                        ) : (
+                                                                            <div className='z-[2] absolute top-0 left-0 w-full min-h-64 flex justify-center items-center gap-y-4 flex-col p-4 text-center'>
+                                                                                <div>
+                                                                                    <CloudUpload size={60} />
+                                                                                </div>
+                                                                                <div className='space-y-4'>
+                                                                                    <h2 className='font-semibold text-2xl'>
+                                                                                        <span>Drop your images here, or </span>
+                                                                                        <span className='text-orange-400'>click to browse</span>
+                                                                                    </h2>
+
+                                                                                    <p className='font-notoSans'>
+                                                                                        1600 x 1200 (4:3) recommended. PNG, JPG and GIF files are allowed
+                                                                                    </p>
+                                                                                </div>
+                                                                            </div>
+                                                                        )
                                                                     }
                                                                 </div>
-                                                            ) : (
-                                                                <div className='z-[2] absolute top-0 left-0 w-full min-h-64 flex justify-center items-center gap-y-4 flex-col p-4 text-center'>
-                                                                    <div>
-                                                                        <CloudUpload size={60} />
-                                                                    </div>
-                                                                    <div className='space-y-4'>
-                                                                        <h2 className='font-semibold text-2xl'>
-                                                                            <span>Drop your images here, or </span>
-                                                                            <span className='text-orange-400'>click to browse</span>
-                                                                        </h2>
-
-                                                                        <p className='font-notoSans'>
-                                                                            1600 x 1200 (4:3) recommended. PNG, JPG and GIF files are allowed
-                                                                        </p>
-                                                                    </div>
-                                                                </div>
-                                                            )
-                                                        }
-                                                    </div>
-                                                </div>
-                                            )
-                                        }}
-                                    />
-                                </FieldGroup>
+                                                            </div>
+                                                        )
+                                                    }}
+                                                />
+                                        </FieldGroup>
+                                    )
+                                }
                             </AccordionContent>
                         </AccordionItem>
                     </Accordion>
@@ -265,6 +298,7 @@ export function NewProductForm({ selectedProduct, selectedProductStatus }: NewPr
                                                             placeholder="Enter product name"
                                                             autoComplete="off"
                                                             className="text-xs font-semibold w-full max-w-full min-w-0 overflow-hidden"
+                                                            disabled={action === 'view'}
                                                         />
 
                                                         {/* {fieldState.isTouched && ( */}
@@ -306,6 +340,7 @@ export function NewProductForm({ selectedProduct, selectedProductStatus }: NewPr
                                                             aria-invalid={fieldState.invalid}
                                                             placeholder='Enter Stock'
                                                             autoComplete='off'
+                                                            disabled={action === 'view'}
                                                         />
                                                         {/* {fieldState.isTouched && ( */}
                                                         <InputGroupAddon
@@ -347,7 +382,8 @@ export function NewProductForm({ selectedProduct, selectedProductStatus }: NewPr
                                                                 selection.push(value);
                                                                 form.setValue('category', selection);
                                                             }}
-
+                                                            value={form.watch('category')[0]}
+                                                            disabled={action === 'view'}
                                                         >
                                                             <SelectTrigger
                                                                 className={clsx('py-2 rounded-md text-start px-2 mt-2 w-full', (field.value.length === 0 && (fieldState.isTouched || form.formState.isSubmitted)) ? 'border border-red-500 dark:border-red-500' : "border border-neutral-200 dark:border-zinc-700")}
@@ -430,9 +466,10 @@ export function NewProductForm({ selectedProduct, selectedProductStatus }: NewPr
                                                                         value={inputValue}
                                                                         onChange={(e) => setInputValue(e.target.value)}
                                                                         id='form-option'
+                                                                        disabled={action === 'view'}
                                                                     />
                                                                     <InputGroupAddon align="inline-end">
-                                                                        <InputGroupButton variant="secondary" onClick={addOption}>
+                                                                        <InputGroupButton disabled={action === 'view'} variant="secondary" onClick={addOption}>
                                                                             Add
                                                                         </InputGroupButton>
                                                                     </InputGroupAddon>
@@ -446,6 +483,7 @@ export function NewProductForm({ selectedProduct, selectedProductStatus }: NewPr
                                                                             index={index}
                                                                             option={option}
                                                                             key={index}
+                                                                            disabled={action === "view"}
                                                                         />
                                                                     )
                                                                 })}
@@ -478,6 +516,7 @@ export function NewProductForm({ selectedProduct, selectedProductStatus }: NewPr
                                                         id="message"
                                                         aria-invalid={fieldState.invalid}
                                                         className={clsx('text-xs font-medium', fieldState.invalid && 'border border-red-500')}
+                                                        disabled={action === 'view'}
                                                     />
                                                 </div>
                                             )
@@ -501,6 +540,7 @@ export function NewProductForm({ selectedProduct, selectedProductStatus }: NewPr
                                                                     size="icon"
                                                                     variant="outline"
                                                                     type='button'
+                                                                    disabled={action === 'view'}
                                                                     onClick={() => {
                                                                         const metaFields = form.watch('metaFields');
                                                                         if (metaFields.length === 0) {
@@ -544,6 +584,7 @@ export function NewProductForm({ selectedProduct, selectedProductStatus }: NewPr
                                                                         idx={idx}
                                                                         metaField={metaField}
                                                                         key={idx}
+                                                                        disabled={action === 'view'}
                                                                     // field={field}
                                                                     />
                                                                 )
@@ -570,6 +611,7 @@ export function NewProductForm({ selectedProduct, selectedProductStatus }: NewPr
                                                         <Tooltip>
                                                             <TooltipTrigger asChild>
                                                                 <Button
+                                                                    disabled={action === 'view'}
                                                                     size="icon"
                                                                     variant="outline"
                                                                     type='button'
@@ -615,6 +657,7 @@ export function NewProductForm({ selectedProduct, selectedProductStatus }: NewPr
                                                                         key={varIndex}
                                                                         field={field}
                                                                         fieldState={fieldState}
+                                                                        disabled={action === 'view'}
                                                                     />
                                                                 )
                                                             })
@@ -659,6 +702,7 @@ export function NewProductForm({ selectedProduct, selectedProductStatus }: NewPr
                                                     <Field className='font-quickSand p-4'>
                                                         <FieldLabel htmlFor='form-price'>Price</FieldLabel>
                                                         <Input
+                                                            disabled={action === 'view'}
                                                             onChange={(e) => {
                                                                 const value = e.target.value === '' ? 0 : +e.target.value;
                                                                 field.onChange(value);
@@ -699,6 +743,7 @@ export function NewProductForm({ selectedProduct, selectedProductStatus }: NewPr
                                                     <Field className='font-quickSand p-4'>
                                                         <FieldLabel htmlFor='form-discount'>Discount</FieldLabel>
                                                         <Input
+                                                            disabled={action === 'view'}
                                                             onChange={(e) => {
                                                                 const value = e.target.value === '' ? 0 : +e.target.value;
                                                                 field.onChange(value)
@@ -735,11 +780,16 @@ export function NewProductForm({ selectedProduct, selectedProductStatus }: NewPr
 
                 </Card>
 
-                <Button type='submit' variant="secondary" className='cursor-pointer'>
-                    {
-                        selectedProductStatus === 'draft' ? "Save Draft" : "Create Product"
-                    }
-                </Button>
+                {
+                    action !== 'view' && (
+                        <Button type='submit' variant="secondary" className='cursor-pointer'>
+                            {
+                                selectedProductStatus === 'draft' ? "Save Draft" : "Create Product"
+                            }
+                        </Button>
+                    )
+                }
+
             </form>
         </div>
     )

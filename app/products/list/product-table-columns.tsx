@@ -103,8 +103,8 @@ function RowAction({ productRow }: { productRow: FetchedProduct }) {
 
             {
                 (dialogType === "edit" || dialogType === 'view') && (
-                    <DialogContent className="max-h-10/12 flex flex-col overflow-y-scroll">
-                        <DialogHeader className="">
+                    <DialogContent className="max-h-10/12 flex flex-col overflow-y-auto">
+                        <DialogHeader>
                             <DialogTitle>
                                 {dialogType === "edit" ? "Edit" : "View"} Product
                             </DialogTitle>
@@ -265,7 +265,7 @@ export const productTableCols: ColumnDef<FetchedProduct>[] = [
         header: ({ column, header, table }) => {
             return (
                 <Select
-                    value={(table.getColumn("status")?.getFilterValue() as string) ?? ""}
+                    value={(table.getColumn("status")?.getFilterValue() as string) ?? "all"}
                     onValueChange={(value) => {
                         table.getColumn("status")?.setFilterValue(
                             value === "all" ? undefined : value
@@ -290,9 +290,6 @@ export const productTableCols: ColumnDef<FetchedProduct>[] = [
             else return <p className="text-green-700 text-xs font-medium bg-green-200 px-3 py-1 rounded-full w-fit">Published</p>
         },
         filterFn: (row, id, value) => {
-            console.log({
-                row, id, value
-            })
             return row.getValue(id) === value;
         }
     },

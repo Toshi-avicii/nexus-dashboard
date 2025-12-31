@@ -14,9 +14,6 @@ function ProductsTable() {
         },
     });
 
-    // console.log({
-    //     data: productListQuery.data?.data
-    // })
     return (
         <div className="font-quickSand">
             <DataTable columns={productTableCols} data={productListQuery.data?.data.data || []}>
