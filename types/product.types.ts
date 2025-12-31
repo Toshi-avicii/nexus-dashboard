@@ -19,8 +19,11 @@ export type MetaField = {
     type: string;
 }
 
+export type SelectedProduct = 'clothing' | 'furniture' | 'other' | 'electronics';
+export type SelectedStatus = 'draft' | 'published';
+
 export type NewProduct = {
-    productType: "clothing" | "electronics" | "furniture" | "other" | null;
+    productType: SelectedProduct | null;
     name: string;
     price: number;
     discount: number;
@@ -36,3 +39,14 @@ export type NewProduct = {
 
 export type ProductStatus = 'draft' | 'published';
 
+export type FetchedProduct = Omit<NewProduct, 'images' | 'category'> & {
+    _id: string;
+    images: string[];
+    category: {
+        _id: string;
+        name: string;
+    }[];
+    status: ProductStatus;
+    createdAt: string;
+    updatedAt: string;
+}

@@ -17,7 +17,7 @@ function CreateProductPage() {
             </Breadcrumb>
 
             <div className="my-4">
-                <CreateNewProduct />
+                <CreateNewProduct action="create" />
             </div>
         </div>
     )

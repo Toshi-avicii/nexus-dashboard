@@ -5,7 +5,6 @@ import { useState } from "react";
 import { Controller, ControllerFieldState, ControllerRenderProps, UseFormReturn } from "react-hook-form";
 import { toast } from "sonner";
 import z from "zod";
-import { newProductFormSchema } from "./create-new-product";
 import { CircleX, Info, Plus, X } from "lucide-react";
 import { FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -14,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import clsx from "clsx";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
+import { newProductFormSchema } from "@/components/NewProductForm";
 
 type Option = {
     name: string;
@@ -34,11 +34,12 @@ type Variant = {
     options: Record<string, string>[];
 }
 
-export function OptionField({ option, index, form, field }: {
+export function OptionField({ option, index, form, field, disabled }: {
     option: Option,
     index: number,
     form: UseFormReturn<z.infer<typeof newProductFormSchema>>,
-    field: ControllerRenderProps<z.infer<typeof newProductFormSchema>>
+    field: ControllerRenderProps<z.infer<typeof newProductFormSchema>>,
+    disabled?: boolean
 }) {
     const [valueInputs, setValueInputs] = useState<Record<number, string>>({});
     const addValueToOption = (index: number) => {
@@ -82,6 +83,7 @@ export function OptionField({ option, index, form, field }: {
                 <button
                     className="text-red-500 text-xs"
                     type="button"
+                    disabled={disabled}
                     onClick={() => {
                         const updated = field.value.filter((_: Option, i: number) => i !== index);
                         form.setValue("options", updated, {
@@ -111,10 +113,12 @@ export function OptionField({ option, index, form, field }: {
                                             [index]: e.target.value,
                                         }))
                                     }
+                                    disabled={disabled}
                                 />
                                 <InputGroupAddon align="inline-end">
                                     <InputGroupButton
                                         variant="default"
+                                        disabled={disabled}
                                         onClick={() => addValueToOption(index)}
                                     >
                                         Add Value
@@ -153,6 +157,7 @@ export function OptionField({ option, index, form, field }: {
                             className="text-red-500 text-xs"
                             type="button"
                             onClick={() => deleteValue(index, valueIndex)}
+                            disabled={disabled}
                         >
                             ✕
                         </button>
@@ -168,12 +173,14 @@ export function MetaField({
     form,
     metaField,
     fieldState,
+    disabled
     // field
 }: {
     form: UseFormReturn<z.infer<typeof newProductFormSchema>>,
     idx: number,
     metaField: MetaFieldObject,
     fieldState: ControllerFieldState,
+    disabled?: boolean
     // field: ControllerRenderProps<z.infer<typeof newProductFormSchema>>
 }) {
     const { key, namespace, type, value } = metaField;
@@ -186,16 +193,21 @@ export function MetaField({
                     <div
                         key={idx}
                         className='grid grid-cols-2 gap-4 border border-neutral-200 dark:border-zinc-700 p-4 rounded-md relative'
-                    >
-                        <div
-                            className='absolute -top-2 -right-2 w-4 h-4 rounded-full bg-red-500 flex justify-center items-center cursor-pointer'
-                            onClick={() => {
-                                const updated = form.watch('metaFields').filter((item, index) => index !== idx);
-                                form.setValue('metaFields', updated);
-                            }}
-                        >
-                            <X size={10} />
-                        </div>
+                    > 
+                        {
+                            !disabled && (
+                                <div
+                                    className='absolute -top-2 -right-2 w-4 h-4 rounded-full bg-red-500 flex justify-center items-center cursor-pointer'
+                                    onClick={() => {
+                                        const updated = form.watch('metaFields').filter((item, index) => index !== idx);
+                                        form.setValue('metaFields', updated);
+                                    }}
+                                    
+                                >
+                                    <X size={10} />
+                                </div>
+                            ) 
+                        }
                         {/* namespace */}
                         <div>
                             <FieldLabel
@@ -207,6 +219,7 @@ export function MetaField({
                             <Input
                                 placeholder='What would be the name of the feature...'
                                 id='namespace'
+                                disabled={disabled}
                                 value={namespace}
                                 onChange={(e) => {
                                     const updated = form.watch('metaFields').map((metaField, index) => {
@@ -227,6 +240,7 @@ export function MetaField({
                             <FieldLabel htmlFor='key' className='mb-2'>Key</FieldLabel>
                             <Input
                                 placeholder='Add the feature name...'
+                                disabled={disabled}
                                 value={key}
                                 id='key'
                                 className={clsx(key.length === 0 && 'border border-red-400')}
@@ -252,6 +266,7 @@ export function MetaField({
                             </FieldLabel>
                             <Select
                                 value={type}
+                                disabled={disabled}
                                 onValueChange={(value) => {
                                     const updated = form.watch('metaFields').map((metaField, index) => {
                                         if (index === idx) {
@@ -298,6 +313,7 @@ export function MetaField({
                                             Value
                                         </FieldLabel>
                                         <Input
+                                            disabled={disabled}
                                             className={clsx('mt-2', value.toString().length === 0 && "border border-red-400")}
                                             placeholder='Add the feature value'
                                             id='string'
@@ -323,6 +339,7 @@ export function MetaField({
                                             Value
                                         </FieldLabel>
                                         <Input
+                                            disabled={disabled}
                                             type='number'
                                             className={clsx('mt-2', +value <= 0 && "border border-red-400")}
                                             placeholder='Add the feature value'
@@ -349,6 +366,7 @@ export function MetaField({
                                         <Textarea
                                             placeholder="Add values by commas separated values (e.g. value1, value2, ...)"
                                             id="array"
+                                            disabled={disabled}
                                             aria-invalid={fieldState.invalid}
                                             className={clsx('h-full mt-2', fieldState.invalid && 'border border-red-500')}
                                             onChange={(e) => {
@@ -383,8 +401,8 @@ export function MetaField({
                                             Value
                                         </FieldLabel>
                                         <Select
+                                            disabled={disabled}
                                             onValueChange={(val) => {
-
                                                 const updated = form.watch('metaFields').map((metaField, index) => {
                                                     if (val === 'true') {
                                                         if (idx === index) {
@@ -399,7 +417,6 @@ export function MetaField({
                                                 })
 
                                                 form.setValue('metaFields', updated);
-
                                             }}
                                         >
                                             <SelectTrigger
@@ -428,6 +445,7 @@ export function MetaField({
                                                 Key
                                             </FieldLabel>
                                             <Input
+                                                disabled={disabled}
                                                 placeholder='Key'
                                                 value={typeof value === "object" ? Object.keys(value)[0] : ""}
                                                 className={clsx((typeof value === "object" && Object.keys(value)[0] === "" && 'border border-red-400'))}
@@ -459,6 +477,7 @@ export function MetaField({
                                             </FieldLabel>
                                             {/* dynamic value input */}
                                             <Input
+                                                disabled={disabled}
                                                 placeholder='Value'
                                                 value={typeof value === "object" ? Object.values(value)[0]?.toString() : ""}
                                                 className={clsx((typeof value === "object" && Object.values(value)[0] === "" && 'border border-red-400'))}
@@ -495,13 +514,15 @@ export function VariantField({
     form,
     variant,
     field,
-    fieldState
+    fieldState,
+    disabled
 }: {
     varIndex: number,
     form: UseFormReturn<z.infer<typeof newProductFormSchema>>,
     variant: Variant,
     field: ControllerRenderProps<z.infer<typeof newProductFormSchema>>,
-    fieldState: ControllerFieldState
+    fieldState: ControllerFieldState,
+    disabled?: boolean
 }) {
     const { options, price, sku, stock } = variant;
 
@@ -515,18 +536,22 @@ export function VariantField({
                         key={varIndex}
                         className='p-4 border border-neutral-100 dark:border-zinc-700 rounded-md mt-4 grid grid-cols-3 gap-4 relative'
                     >
-                        <div
-                            className='absolute -top-1 -right-2 flex justify-center items-center rounded-full w-4 h-4 bg-red-500 cursor-pointer'
-                            onClick={(e) => {
-                                const updated = form.watch('variants').filter((v, vIndex) => {
-                                    return vIndex !== varIndex;
-                                });
+                        {
+                            !disabled && (
+                                <div
+                                    className='absolute -top-1 -right-2 flex justify-center items-center rounded-full w-4 h-4 bg-red-500 cursor-pointer'
+                                    onClick={(e) => {
+                                        const updated = form.watch('variants').filter((v, vIndex) => {
+                                            return vIndex !== varIndex;
+                                        });
 
-                                form.setValue('variants', updated);
-                            }}
-                        >
-                            <X size={10} />
-                        </div>
+                                        form.setValue('variants', updated);
+                                    }}
+                                >
+                                    <X size={10} />
+                                </div>
+                            )
+                        }
 
                         {/* sku */}
                         <div className='flex flex-col gap-y-2'>
@@ -540,6 +565,7 @@ export function VariantField({
                                 </Tooltip>
                             </FieldLabel>
                             <Input
+                                disabled={disabled}
                                 placeholder='Enter SKU of the variant'
                                 id='sku'
                                 value={sku}
@@ -573,6 +599,7 @@ export function VariantField({
                                 Price
                             </FieldLabel>
                             <Input
+                                disabled={disabled}
                                 type='number'
                                 placeholder='Enter price of the variant'
                                 id='price'
@@ -607,6 +634,7 @@ export function VariantField({
                                 Stock
                             </FieldLabel>
                             <Input
+                                disabled={disabled}
                                 type='number'
                                 placeholder='Enter stock of the variant'
                                 id='stock'
@@ -642,6 +670,7 @@ export function VariantField({
                                     Options
                                 </FieldLabel>
                                 <Button
+                                    disabled={disabled}
                                     className='rounded-full p-0 h-8 w-8 cursor-pointer'
                                     variant="outline"
                                     type='button'
@@ -680,35 +709,40 @@ export function VariantField({
                                             <div
                                                 key={optIndex}
                                                 className='flex gap-x-2 relative border border-neutral-200 dark:border-zinc-700 rounded-md p-4'>
-                                                <div
-                                                    className='absolute top-0 -right-0 flex justify-center items-center rounded-tr-md w-6 h-5 rounded-bl-md bg-red-500 cursor-pointer'
-                                                    onClick={(e) => {
-                                                        const variants = form.watch("variants");
-                                                        const updated = variants.map((variant, index) => {
-                                                            if (index === varIndex) {
-                                                                const updatedOptions = variant.options.filter((opt, optIdx) => {
-                                                                    return optIndex !== optIdx;
-                                                                });
+                                                    {
+                                                        !disabled && (
+                                                            <div
+                                                                className='absolute top-0 -right-0 flex justify-center items-center rounded-tr-md w-6 h-5 rounded-bl-md bg-red-500 cursor-pointer'
+                                                                onClick={(e) => {
+                                                                    const variants = form.watch("variants");
+                                                                    const updated = variants.map((variant, index) => {
+                                                                        if (index === varIndex) {
+                                                                            const updatedOptions = variant.options.filter((opt, optIdx) => {
+                                                                                return optIndex !== optIdx;
+                                                                            });
 
-                                                                return {
-                                                                    ...variant,
-                                                                    options: updatedOptions
-                                                                }
-                                                            }
-                                                            return variant;
-                                                        });
+                                                                            return {
+                                                                                ...variant,
+                                                                                options: updatedOptions
+                                                                            }
+                                                                        }
+                                                                        return variant;
+                                                                    });
 
-                                                        form.setValue('variants', updated);
-                                                    }}
-                                                >
-                                                    <X size={12} />
-                                                </div>
+                                                                    form.setValue('variants', updated);
+                                                                }}
+                                                            >
+                                                                <X size={12} />
+                                                            </div>
+                                                        )
+                                                    }
                                                 {/* dynamic key input */}
                                                 <div className='flex flex-1 flex-col gap-y-2'>
                                                     <FieldLabel htmlFor='key'>
                                                         Key
                                                     </FieldLabel>
                                                     <Input
+                                                        disabled={disabled}
                                                         placeholder='Key'
                                                         value={typeof option === "object" ? Object.values(option)[0] : ""}
                                                         className={clsx(typeof option === "object" && Object.values(option)[0] === "" && 'border border-red-400')}
@@ -752,6 +786,7 @@ export function VariantField({
                                                     </FieldLabel>
                                                     {/* dynamic value input */}
                                                     <Input
+                                                        disabled={disabled}
                                                         placeholder='Value'
                                                         value={typeof option === "object" ? Object.values(option)[1]?.toString() : ""}
                                                         className={clsx(typeof option === "object" && Object.values(option)[1] === "" && 'border border-red-400')}

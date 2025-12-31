@@ -28,7 +28,6 @@ function RowAction({ categoryRow }: { categoryRow: Category }) {
         },
         onSuccess(data) {
             if (data) {
-                console.log({ data });
                 toast.dismiss('category-delete-toast');
                 toast.success(data.data.message);
                 setDialogType(null);
@@ -106,7 +105,7 @@ function RowAction({ categoryRow }: { categoryRow: Category }) {
                         <DialogTitle>Delete Category</DialogTitle>
                     </DialogHeader>
                     <div>
-                        <p>Are you sure you want to delete this category? All the transactions related to this budget will also get deleted.</p>
+                        <p>Are you sure you want to delete this category? All the products related to this category will also get moved to being uncategorized.</p>
                     </div>
                     {/* dialog footer */}
                     <DialogFooter>

@@ -2,6 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { generateInrAmount } from "@/utils/generateInrAmount";
 import clsx from "clsx";
 import { Package, PackageX, Pen, SquarePen, Tag } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -36,15 +37,6 @@ type ProductDetails = {
         type: string;
     }[];
     description?: string | undefined;
-}
-
-function generateInrAmount(amount: number): string {
-    const formatted = new Intl.NumberFormat("en-IN", {
-        style: "currency",
-        currency: "INR"
-    }).format(amount);
-
-    return formatted;
 }
 
 function ProductDetail({

@@ -1,3 +1,4 @@
+import ProductsTable from "@/components/ProductsTable"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 
 function ListPage() {
@@ -14,6 +15,7 @@ function ListPage() {
                     </BreadcrumbItem>
                 </BreadcrumbList>
             </Breadcrumb>
+            <ProductsTable />
         </div>
     )
 }
