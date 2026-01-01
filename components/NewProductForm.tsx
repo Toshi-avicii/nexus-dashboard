@@ -1,10 +1,9 @@
 import { getCategories } from "@/helpers/category.helpers";
 import { createProduct } from "@/helpers/product.helpers";
 import { FetchedProduct, NewProduct } from "@/types/product.types";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useState } from "react";
-import { Controller, useForm, useFormContext } from "react-hook-form";
+import { useEffect, useState } from "react";
+import { Controller, useFormContext } from "react-hook-form";
 import { toast } from "sonner";
 import z from "zod";
 import { Card } from "./ui/card";
@@ -22,6 +21,7 @@ import { Textarea } from "./ui/textarea";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 import { Button } from "./ui/button";
 import Image from "next/image";
+import { convertUrlToFile } from "@/utils/convertUrlToFile";
 
 type SelectedProduct = 'clothing' | 'furniture' | 'other' | 'electronics';
 type SelectedStatus = 'draft' | 'published';
@@ -117,6 +117,26 @@ export function NewProductForm({ selectedProduct, selectedProductStatus, product
         createProductMutation.mutate(dataToBeSent);
     }
 
+    const fileToUrl = async () => {
+        const result = productData?.images.map(async (img) => {
+            return await convertUrlToFile(img)
+        });
+
+        if (!result) return [];
+        const resolved = await Promise.all(result);
+        const files = resolved.filter((r): r is File => r instanceof File);
+        return files;
+    }
+
+    useEffect(() => {
+        const initialLoad = async () => {
+            const res = await fileToUrl();
+            form.setValue('images', res);
+        }
+
+        if(action === 'edit') initialLoad();
+    }, [action]);
+
     return (
         <div className='flex-[7]'>
             <form
@@ -143,14 +163,14 @@ export function NewProductForm({ selectedProduct, selectedProductStatus, product
                             </AccordionTrigger>
                             <AccordionContent className='pt-4'>
                                 {
-                                    (action === 'view' && productData) ? 
+                                    (action === 'view' && productData) ?
                                         <div className="w-full px-4 pb-4">
                                             <div className='relative min-h-64 border-2 rounded-md border-dashed dark:border-zinc-700 border-gray-300 grid grid-cols-3 gap-4 p-3'>
                                                 {
                                                     productData.images.length > 0 ? productData.images.map((imgUrl, idx) => {
                                                         return (
                                                             <div className="flex rounded-md">
-                                                                <Image 
+                                                                <Image
                                                                     key={idx}
                                                                     src={imgUrl}
                                                                     width={100}
@@ -164,13 +184,12 @@ export function NewProductForm({ selectedProduct, selectedProductStatus, product
                                                         <div className="w-full col-span-3 flex justify-center items-center">
                                                             <p>No images uploaded</p>
                                                         </div>
-                                                    ) 
-                                                }           
+                                                    )
+                                                }
                                             </div>
-
                                         </div>
-                                    : (
-                                        <FieldGroup>
+                                        : (
+                                            <FieldGroup>
                                                 <Controller
                                                     name='images'
                                                     control={form.control}
@@ -193,7 +212,7 @@ export function NewProductForm({ selectedProduct, selectedProductStatus, product
 
                                                                     {
                                                                         field.value.length > 0 ? (
-                                                                            <div className='grid grid-cols-4 p-4 place-items-center gap-4'>
+                                                                            <div className='grid grid-cols-3 p-4 place-items-center gap-4'>
                                                                                 {
                                                                                     field.value.map((file, idx) => {
                                                                                         if (file instanceof File) {
@@ -201,7 +220,7 @@ export function NewProductForm({ selectedProduct, selectedProductStatus, product
                                                                                             return (
                                                                                                 <div
                                                                                                     key={idx}
-                                                                                                    className='p-2 rounded-md h-32 w-32 bg-neutral-100 dark:bg-zinc-700 text-gray-800 flex flex-col dark:text-gray-50 justify-center items-center gap-y-3 relative'
+                                                                                                    className='p-2 rounded-md h-32 w-32 bg-neutral-100 dark:bg-zinc-700 text-gray-800 flex flex-col dark:text-gray-50 justify-center items-center gap-y-3 relative gap-x-4'
                                                                                                 >
                                                                                                     <p className='text-sm text-center'>{file.name}</p>
                                                                                                     <p>{sizeInMB}MB</p>
@@ -254,8 +273,8 @@ export function NewProductForm({ selectedProduct, selectedProductStatus, product
                                                         )
                                                     }}
                                                 />
-                                        </FieldGroup>
-                                    )
+                                            </FieldGroup>
+                                        )
                                 }
                             </AccordionContent>
                         </AccordionItem>
