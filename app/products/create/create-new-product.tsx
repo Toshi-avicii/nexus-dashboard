@@ -62,8 +62,8 @@ function getInitialFormData(action: Action, productData?: FetchedProduct): Creat
 }
 
 function CreateNewProduct({ action, productData }: { action: Action, productData?: FetchedProduct }) {
-    const [selectedProduct, setSelectedProduct] = useState<SelectedProduct | null>(null);
-    const [selectedProductStatus, setSelectedProductStatus] = useState<SelectedStatus>('draft');
+    const [selectedProduct, setSelectedProduct] = useState<SelectedProduct | null>(productData ? productData.productType : null);
+    const [selectedProductStatus, setSelectedProductStatus] = useState<SelectedStatus>(productData ? productData.status : 'draft');
     const isInReadOrEditView = ((action === "view" || action === "edit") && productData);
     const [formData] = useState(
         action === "create" ? getInitialFormData(action) : getInitialFormData(action, productData!)
@@ -87,91 +87,137 @@ function CreateNewProduct({ action, productData }: { action: Action, productData
         mode: "all"
     });
 
+    function generateStyleForProductStatus() {
+        if (action === 'create' && selectedProductStatus === 'draft') {
+            return clsx('bg-red-400 text-white');
+        }
+
+        if (action === 'edit' && selectedProductStatus === 'draft') {
+            return clsx('bg-red-400 text-white');
+        }
+
+        if (action === 'view' && productData?.status === 'draft') {
+            return clsx('bg-red-400 text-white');
+        }
+
+        return clsx('bg-green-600 text-white');
+    }
+
+    function generateStyleForArrow() {
+        if (action === 'create' && selectedProductStatus === 'draft') {
+            return clsx('bg-red-400 fill-red-400');
+        }
+
+        if (action === 'edit' && selectedProductStatus === 'draft') {
+            return clsx('bg-red-400 fill-red-400');
+        }
+
+        if (action === 'view' && productData?.status === 'draft') {
+            return clsx('bg-red-400 fill-red-400');
+        }
+
+        return clsx('bg-green-600 text-white fill-green-600');
+    }
+
     return (
         <div>
             <FormProvider {...form}>
-                {
-                    (action === "create") && (
-                        <div className='flex justify-between items-center'>
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button
-                                        variant="default"
-                                        className="font-quickSand flex items-center justify-center gap-x-2 cursor-pointer px-4 py-4"
-                                    >
-                                        <Plus />
-                                        <span>Create Product</span>
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent className="w-40 font-quickSand" align="start">
-                                    <DropdownMenuGroup>
-                                        {
-                                            availableProductCategories.map((item) => {
-                                                return (
-                                                    <DropdownMenuItem
-                                                        key={item.id}
-                                                        onSelect={(e: React.MouseEvent<HTMLDivElement> | Event) => {
-                                                            setSelectedProduct(item.value as SelectedProduct);
-                                                        }}
-                                                    >
-                                                        {item.text}
-                                                    </DropdownMenuItem>
-                                                )
-                                            })
-                                        }
-                                    </DropdownMenuGroup>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
+                <div className='flex justify-between items-center mb-4'>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button
+                                disabled={action === 'view'}
+                                variant="default"
+                                className="font-quickSand flex items-center justify-center gap-x-2 cursor-pointer px-4 py-4"
+                            >
+                                {
+                                    action !== 'view' && <Plus />
+                                }
+                                <span>
+                                    {
+                                        // (action === 'view') ? productData?.productType : (
+                                        //     action === 'edit' ? productData?.productType : action === 'create' ? selectedProduct : "Create Product"
+                                        // )
+                                        selectedProduct ? selectedProduct : "Create Product"
+                                    }
+                                </span>
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="w-40 font-quickSand" align="start">
+                            <DropdownMenuGroup>
+                                {
+                                    availableProductCategories.map((item) => {
+                                        return (
+                                            <DropdownMenuItem
+                                                key={item.id}
+                                                onSelect={(e: React.MouseEvent<HTMLDivElement> | Event) => {
+                                                    setSelectedProduct(item.value as SelectedProduct);
+                                                }}
+                                            >
+                                                {item.text}
+                                            </DropdownMenuItem>
+                                        )
+                                    })
+                                }
+                            </DropdownMenuGroup>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
 
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <div>
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button
-                                                    variant="default"
-                                                    className="font-quickSand flex items-center justify-center gap-x-2 cursor-pointer px-4 py-4"
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <div>
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button
+                                            disabled={action === 'view'}
+                                            variant="default"
+                                            className="font-quickSand flex items-center justify-center gap-x-2 cursor-pointer px-4 py-4"
+                                        >
+                                            {
+                                                action !== 'view' && (selectedProductStatus === "draft" ? <Pencil /> : <CircleCheck />)
+                                            }
+
+                                            <span>
+                                                {
+                                                    action === "view" ? productData?.status : "Product Status"
+                                                }
+                                            </span>
+                                        </Button>
+                                    </DropdownMenuTrigger>
+
+                                    <DropdownMenuContent className="w-40 font-quickSand" align="start">
+                                        <DropdownMenuGroup>
+                                            {[
+                                                { id: 1, text: "Draft", value: "draft" },
+                                                { id: 2, text: "Publish", value: "published" },
+                                            ].map((item) => (
+                                                <DropdownMenuItem
+                                                    key={item.id}
+                                                    onSelect={() =>
+                                                        setSelectedProductStatus(item.value as SelectedStatus)
+                                                    }
                                                 >
-                                                    {selectedProductStatus === "draft" ? <Pencil /> : <CircleCheck />}
-                                                    <span>Product Status</span>
-                                                </Button>
-                                            </DropdownMenuTrigger>
+                                                    {item.text}
+                                                </DropdownMenuItem>
+                                            ))}
+                                        </DropdownMenuGroup>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            </div>
+                        </TooltipTrigger>
 
-                                            <DropdownMenuContent className="w-40 font-quickSand" align="start">
-                                                <DropdownMenuGroup>
-                                                    {[
-                                                        { id: 1, text: "Draft", value: "draft" },
-                                                        { id: 2, text: "Publish", value: "published" },
-                                                    ].map((item) => (
-                                                        <DropdownMenuItem
-                                                            key={item.id}
-                                                            onSelect={() =>
-                                                                setSelectedProductStatus(item.value as SelectedStatus)
-                                                            }
-                                                        >
-                                                            {item.text}
-                                                        </DropdownMenuItem>
-                                                    ))}
-                                                </DropdownMenuGroup>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
-                                    </div>
-                                </TooltipTrigger>
-
-                                <TooltipContent
-                                    className={clsx(selectedProductStatus === 'draft' ? 'bg-red-400 text-white' : 'bg-green-600 text-white')}
-                                    arrowClassName={clsx(selectedProductStatus === 'draft' ? 'bg-red-400 fill-red-400' : 'bg-green-600 text-white fill-green-600')}
-                                >
-                                    {selectedProductStatus === "draft" ? (
-                                        <p>Product will be saved as draft</p>
-                                    ) : (
-                                        <p>Product will be published</p>
-                                    )}
-                                </TooltipContent>
-                            </Tooltip>
-                        </div>
-                    )
-                }
+                        <TooltipContent
+                            className={generateStyleForProductStatus()}
+                            arrowClassName={generateStyleForArrow()}
+                        >
+                            {selectedProductStatus === "draft" ? (
+                                <p>Product will be saved as draft</p>
+                            ) : (
+                                <p>Product will be published</p>
+                            )}
+                        </TooltipContent>
+                    </Tooltip>
+                </div>
 
                 {
                     (action === "create" && selectedProduct) && (
@@ -194,9 +240,9 @@ function CreateNewProduct({ action, productData }: { action: Action, productData
                                     description={form.watch('description')}
                                 />
                             </Card>
-                            <NewProductForm 
-                                selectedProduct={selectedProduct} 
-                                selectedProductStatus={selectedProductStatus} 
+                            <NewProductForm
+                                selectedProduct={selectedProduct}
+                                selectedProductStatus={selectedProductStatus}
                                 action='create'
                             />
                         </div>

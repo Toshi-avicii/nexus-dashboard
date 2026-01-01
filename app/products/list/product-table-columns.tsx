@@ -18,7 +18,7 @@ import { NewProductForm } from "@/components/NewProductForm";
 
 function RowAction({ productRow }: { productRow: FetchedProduct }) {
     const [dialogType, setDialogType] = useState<'view' | 'edit' | 'delete' | null>(null);
-    const queryClient = useQueryClient();
+    // const queryClient = useQueryClient();
     return (
         <Dialog open={dialogType !== null} onOpenChange={(open) => !open && setDialogType(null)}>
             <div className='space-x-4 flex items-center'>
