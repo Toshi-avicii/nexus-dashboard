@@ -54,7 +54,7 @@ function CategoryListPage() {
       </Breadcrumb>
 
       <div className='my-4'>
-        <DataTable columns={columns} data={categoryListQuery.data?.data?.data || []}>
+        <DataTable columns={columns} data={categoryListQuery.data?.data?.data || []} isLoading={categoryListQuery.isLoading || categoryListQuery.isFetching}>
           <DataTable.Toolbar>
             <DataTable.Search />
             <DataTable.BulkDelete onDelete={(ids: string[]) => {

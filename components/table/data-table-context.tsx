@@ -9,6 +9,7 @@ type DataTableContextValue<TData extends WithId> = {
   table: Table<TData>;
   selectedIds: string[];
   columns: ColumnDef<TData>[];
+  isLoading?: boolean;
 }
 
 export const DataTableContext = React.createContext<DataTableContextValue<any> | null>(null)
