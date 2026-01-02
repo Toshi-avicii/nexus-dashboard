@@ -135,9 +135,6 @@ function CreateNewProduct({ action, productData }: { action: Action, productData
                                 }
                                 <span>
                                     {
-                                        // (action === 'view') ? productData?.productType : (
-                                        //     action === 'edit' ? productData?.productType : action === 'create' ? selectedProduct : "Create Product"
-                                        // )
                                         selectedProduct ? selectedProduct : "Create Product"
                                     }
                                 </span>
@@ -262,8 +259,8 @@ function CreateNewProduct({ action, productData }: { action: Action, productData
                 {
                     ((action === "edit" || action === "view") && productData) && (
                         <NewProductForm
-                            selectedProduct={productData.productType}
-                            selectedProductStatus={productData.status}
+                            selectedProduct={selectedProduct}
+                            selectedProductStatus={selectedProductStatus}
                             productData={productData}
                             action={action}
                         />
