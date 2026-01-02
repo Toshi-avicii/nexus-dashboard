@@ -1,5 +1,5 @@
 import { getCategories } from "@/helpers/category.helpers";
-import { createProduct } from "@/helpers/product.helpers";
+import { createProduct, updateProductById } from "@/helpers/product.helpers";
 import { FetchedProduct, NewProduct } from "@/types/product.types";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
@@ -105,16 +105,47 @@ export function NewProductForm({ selectedProduct, selectedProductStatus, product
             toast.dismiss('loading-toast');
             toast.error(err.message);
         }
+    });
+
+    const updateProductMutation = useMutation({
+        mutationFn: updateProductById,
+        onMutate() {
+            toast.loading('Creating...', { id: 'loading-toast' });
+        },
+        onSuccess: async (data) => {
+            if (data) {
+                toast.dismiss("loading-toast");
+                toast.success("Product data updated successfully")
+                form.reset();
+            }
+        },
+        onError: (err) => {
+            toast.dismiss('loading-toast');
+            toast.error(err.message);
+        }
     })
 
     function createNewProduct(data: z.infer<typeof newProductFormSchema>) {
-        const dataToBeSent = {
-            ...data,
-            productType: selectedProduct,
-            productStatus: selectedProductStatus,
-        }
+        if(action === 'create') {
+            const dataToBeSent = {
+                ...data,
+                productType: selectedProduct,
+                productStatus: selectedProductStatus,
+            }
+    
+            createProductMutation.mutate(dataToBeSent);
+        } 
 
-        createProductMutation.mutate(dataToBeSent);
+        if(action === 'edit' && productData) {
+            const dataToBeSent = {
+                ...data,
+                productType: selectedProduct,
+                productStatus: selectedProductStatus,
+                id: productData._id
+            }
+
+            updateProductMutation.mutate(dataToBeSent);
+        }
     }
 
     const fileToUrl = async () => {

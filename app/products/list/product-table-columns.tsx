@@ -14,11 +14,29 @@ import { generateInrAmount } from "@/utils/generateInrAmount";
 import clsx from "clsx";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import CreateNewProduct from "../create/create-new-product";
-import { NewProductForm } from "@/components/NewProductForm";
+import { deleteProductById } from "@/helpers/product.helpers";
 
 function RowAction({ productRow }: { productRow: FetchedProduct }) {
     const [dialogType, setDialogType] = useState<'view' | 'edit' | 'delete' | null>(null);
-    // const queryClient = useQueryClient();
+    const queryClient = useQueryClient();
+    const deleteProductMutation = useMutation({
+        mutationFn: deleteProductById,
+        onMutate() {
+            toast.loading('Sending...', { id: 'product-delete-toast' });
+        },
+        onSuccess(data) {
+            if (data) {
+                toast.dismiss('product-delete-toast');
+                toast.success(data.data.message);
+                setDialogType(null);
+                queryClient.invalidateQueries({ queryKey: ['get-product-list'] });
+            }
+        },
+        onError(error) {
+            toast.dismiss('product-delete-toast');
+            toast.error(error.message);
+        },
+    });
     return (
         <Dialog open={dialogType !== null} onOpenChange={(open) => !open && setDialogType(null)}>
             <div className='space-x-4 flex items-center'>
@@ -26,11 +44,11 @@ function RowAction({ productRow }: { productRow: FetchedProduct }) {
                     <div className="flex gap-x-3 justify-start items-center">
                         <Tooltip>
                             <TooltipTrigger asChild>
-                                <Button 
+                                <Button
                                     onClick={() => setDialogType("view")}
-                                    variant="outline" 
-                                    type="button" 
-                                    size="icon-sm" 
+                                    variant="outline"
+                                    type="button"
+                                    size="icon-sm"
                                     className="cursor-pointer"
                                 >
                                     <Eye size={12} />
@@ -46,11 +64,11 @@ function RowAction({ productRow }: { productRow: FetchedProduct }) {
                 <DialogTrigger asChild>
                     <Tooltip>
                         <TooltipTrigger asChild>
-                            <Button 
-                                onClick={() => setDialogType("edit")} 
-                                variant="secondary" 
-                                type="button" 
-                                size="icon-sm" 
+                            <Button
+                                onClick={() => setDialogType("edit")}
+                                variant="secondary"
+                                type="button"
+                                size="icon-sm"
                                 className="cursor-pointer"
                             >
                                 <Edit size={12} />
@@ -65,11 +83,11 @@ function RowAction({ productRow }: { productRow: FetchedProduct }) {
                 <DialogTrigger asChild>
                     <Tooltip>
                         <TooltipTrigger asChild>
-                            <Button 
-                                onClick={() => setDialogType("delete")} 
-                                variant="destructive" 
+                            <Button
+                                onClick={() => setDialogType("delete")}
+                                variant="destructive"
                                 type="button"
-                                size="icon-sm" 
+                                size="icon-sm"
                                 className="cursor-pointer"
                             >
                                 <Trash size={12} />
@@ -93,7 +111,9 @@ function RowAction({ productRow }: { productRow: FetchedProduct }) {
                     </div>
                     {/* dialog footer */}
                     <DialogFooter>
-                        <Button onClick={() => { }}>
+                        <Button onClick={() => {
+                            deleteProductMutation.mutate(productRow._id);
+                        }}>
                             <Trash />
                             Delete
                         </Button>
