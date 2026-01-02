@@ -15,6 +15,7 @@ interface DataTableProps<TData extends WithId> {
     columns: ColumnDef<TData>[];
     data: TData[];
     children?: React.ReactNode;
+    isLoading?: boolean;
 }
 
 type DataTableComponent = (<TData extends WithId>(
@@ -31,6 +32,7 @@ const DataTableBase = <TData extends WithId>({
     columns,
     data,
     children,
+    isLoading
 }: DataTableProps<TData>) => {
     const [sorting, setSorting] = useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -75,7 +77,7 @@ const DataTableBase = <TData extends WithId>({
         .rows
         .map(row => row.original._id)
     return (
-        <DataTableContext.Provider value={{ table, selectedIds, columns }}>
+        <DataTableContext.Provider value={{ table, selectedIds, columns, isLoading }}>
             <div className="space-y-4">{children}</div>
         </DataTableContext.Provider>
     )

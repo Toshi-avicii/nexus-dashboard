@@ -16,7 +16,7 @@ function ProductsTable() {
 
     return (
         <div className="font-quickSand">
-            <DataTable columns={productTableCols} data={productListQuery.data?.data.data || []}>
+            <DataTable isLoading={productListQuery.isFetching || productListQuery.isLoading} columns={productTableCols} data={productListQuery.data?.data.data || []}>
                 <DataTable.Toolbar>
                     <DataTable.Search />
                 </DataTable.Toolbar>

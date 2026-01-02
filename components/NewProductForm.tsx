@@ -1,8 +1,8 @@
 import { getCategories } from "@/helpers/category.helpers";
-import { createProduct } from "@/helpers/product.helpers";
+import { createProduct, updateProductById } from "@/helpers/product.helpers";
 import { FetchedProduct, NewProduct } from "@/types/product.types";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { ChangeEvent, useEffect, useState } from "react";
 import { Controller, useFormContext } from "react-hook-form";
 import { toast } from "sonner";
 import z from "zod";
@@ -74,6 +74,7 @@ export const newProductFormSchema = z.object({
 });
 
 export function NewProductForm({ selectedProduct, selectedProductStatus, productData, action }: NewProductFormProps) {
+    const queryClient = useQueryClient();
     const [isPhotosAccordionOpen, setIsPhotosAccordionOpen] = useState(true);
     const [isInfoAccordionOpen, setIsInfoAccordionOpen] = useState(true);
     const [isPriceInfoAccordionOpen, setIsPriceInfoAccordionOpen] = useState(true);
@@ -105,16 +106,49 @@ export function NewProductForm({ selectedProduct, selectedProductStatus, product
             toast.dismiss('loading-toast');
             toast.error(err.message);
         }
+    });
+
+    const updateProductMutation = useMutation({
+        mutationFn: updateProductById,
+        onMutate() {
+            toast.loading('Creating...', { id: 'loading-toast' });
+        },
+        onSuccess: async (data) => {
+            if (data) {
+                toast.dismiss("loading-toast");
+                toast.success("Product data updated successfully")
+                form.reset();
+                //  setDialogType(null);
+                queryClient.invalidateQueries({ queryKey: ['get-product-list'] });
+            }
+        },
+        onError: (err) => {
+            toast.dismiss('loading-toast');
+            toast.error(err.message);
+        }
     })
 
     function createNewProduct(data: z.infer<typeof newProductFormSchema>) {
-        const dataToBeSent = {
-            ...data,
-            productType: selectedProduct,
-            productStatus: selectedProductStatus,
+        if (action === 'create') {
+            const dataToBeSent = {
+                ...data,
+                productType: selectedProduct,
+                productStatus: selectedProductStatus,
+            }
+
+            createProductMutation.mutate(dataToBeSent);
         }
 
-        createProductMutation.mutate(dataToBeSent);
+        if(action === 'edit' && productData) {
+            const dataToBeSent = {
+                ...data,
+                productType: selectedProduct,
+                productStatus: selectedProductStatus,
+                id: productData._id
+            }
+
+            updateProductMutation.mutate(dataToBeSent);
+        }
     }
 
     const fileToUrl = async () => {
@@ -134,7 +168,7 @@ export function NewProductForm({ selectedProduct, selectedProductStatus, product
             form.setValue('images', res);
         }
 
-        if(action === 'edit') initialLoad();
+        if (action === 'edit') initialLoad();
     }, [action]);
 
     return (
@@ -318,6 +352,9 @@ export function NewProductForm({ selectedProduct, selectedProductStatus, product
                                                             autoComplete="off"
                                                             className="text-xs font-semibold w-full max-w-full min-w-0 overflow-hidden"
                                                             disabled={action === 'view'}
+                                                            onChange={(event: ChangeEvent<HTMLInputElement>) => {
+                                                                form.setValue('name', event.target.value);
+                                                            }}
                                                         />
 
                                                         {/* {fieldState.isTouched && ( */}
@@ -351,6 +388,7 @@ export function NewProductForm({ selectedProduct, selectedProductStatus, product
                                                             onChange={(e) => {
                                                                 const value = e.target.value === '' ? 0 : +e.target.value;
                                                                 field.onChange(value);
+                                                                form.setValue('stock', value);
                                                             }}
                                                             onBlur={field.onBlur}
                                                             value={field.value ?? ''}
@@ -536,6 +574,9 @@ export function NewProductForm({ selectedProduct, selectedProductStatus, product
                                                         aria-invalid={fieldState.invalid}
                                                         className={clsx('text-xs font-medium', fieldState.invalid && 'border border-red-500')}
                                                         disabled={action === 'view'}
+                                                        onChange={(event: ChangeEvent<HTMLTextAreaElement>) => {
+                                                            form.setValue('description', event.target.value);
+                                                        }}
                                                     />
                                                 </div>
                                             )
@@ -725,6 +766,7 @@ export function NewProductForm({ selectedProduct, selectedProductStatus, product
                                                             onChange={(e) => {
                                                                 const value = e.target.value === '' ? 0 : +e.target.value;
                                                                 field.onChange(value);
+                                                                form.setValue('price', value);
                                                             }}
                                                             onBlur={field.onBlur}
                                                             value={field.value ?? ''}
@@ -765,7 +807,8 @@ export function NewProductForm({ selectedProduct, selectedProductStatus, product
                                                             disabled={action === 'view'}
                                                             onChange={(e) => {
                                                                 const value = e.target.value === '' ? 0 : +e.target.value;
-                                                                field.onChange(value)
+                                                                field.onChange(value);
+                                                                form.setValue('discount', value);
                                                             }}
                                                             value={field.value ?? ''}
                                                             type='number'
@@ -796,7 +839,6 @@ export function NewProductForm({ selectedProduct, selectedProductStatus, product
                             </AccordionContent>
                         </AccordionItem>
                     </Accordion>
-
                 </Card>
 
                 {

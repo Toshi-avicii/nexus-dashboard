@@ -1,9 +1,10 @@
 import { flexRender } from "@tanstack/react-table";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
 import { useDataTable } from "./data-table-context";
+import { Loader2 } from "lucide-react";
 
 export function DataTableTable() {
-    const { table, columns } = useDataTable();
+    const { table, columns, isLoading } = useDataTable();
     return (
         <div className="overflow-hidden rounded-md border">
             <Table>
@@ -26,7 +27,19 @@ export function DataTableTable() {
                     ))}
                 </TableHeader>
                 <TableBody>
-                    {table.getRowModel().rows?.length ? (
+                    {isLoading ? (
+                        <TableRow>
+                            <TableCell
+                                colSpan={columns.length}
+                                className="h-24 text-center"
+                            >
+                                <div className="flex items-center justify-center gap-2">
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                    Loading...
+                                </div>
+                            </TableCell>
+                        </TableRow>
+                    ) : table.getRowModel().rows?.length ? (
                         table.getRowModel().rows.map((row) => (
                             <TableRow
                                 key={row.id}
