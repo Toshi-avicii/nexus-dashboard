@@ -103,7 +103,25 @@ export async function deleteProductById(productId: string) {
         const reqUrl = `products/${productId}`;
         const result = await api.delete(reqUrl);
         return result;
-    } catch(err) {
+    } catch (err) {
+        if (err instanceof AxiosError) {
+            throw new Error(err.response?.data.message);
+        } else if (err instanceof Error) {
+            throw new Error(err.message);
+        }
+    }
+}
+
+export async function uploadProductsExcelSheet(file: File) {
+    try {
+        const reqUrl = `products/bulk-upload`;
+        
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        const response = await api.post(reqUrl, formData);
+        return response;
+    } catch (err) {
         if (err instanceof AxiosError) {
             throw new Error(err.response?.data.message);
         } else if (err instanceof Error) {
