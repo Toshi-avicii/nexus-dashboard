@@ -6,6 +6,7 @@ import { DataTableToolbar } from "./data-table-toolbar";
 import { DataTableSearch } from "./data-table-search";
 import { DataTablePagination } from "./data-table-pagination";
 import { DataTableBulkDelete } from "./data-table-bulk-delete";
+import DataTableBulkUpload from "./data-table-bulk-upload";
 
 interface WithId {
     _id: string;
@@ -26,6 +27,7 @@ type DataTableComponent = (<TData extends WithId>(
     Table: React.FC
     Pagination: React.FC
     BulkDelete: React.FC<{ onDelete: (selectedIds: string[]) => void; }>
+    BulkUpload: React.FC<{ onUpload: (file: File) => void; }>
 }
 
 const DataTableBase = <TData extends WithId>({
@@ -89,3 +91,4 @@ DataTable.Table = DataTableTable;
 DataTable.Search = DataTableSearch;
 DataTable.Pagination = DataTablePagination;
 DataTable.BulkDelete = DataTableBulkDelete;
+DataTable.BulkUpload = DataTableBulkUpload;

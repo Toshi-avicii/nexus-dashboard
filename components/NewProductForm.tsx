@@ -118,7 +118,6 @@ export function NewProductForm({ selectedProduct, selectedProductStatus, product
                 toast.dismiss("loading-toast");
                 toast.success("Product data updated successfully")
                 form.reset();
-                //  setDialogType(null);
                 queryClient.invalidateQueries({ queryKey: ['get-product-list'] });
             }
         },
@@ -203,9 +202,8 @@ export function NewProductForm({ selectedProduct, selectedProductStatus, product
                                                 {
                                                     productData.images.length > 0 ? productData.images.map((imgUrl, idx) => {
                                                         return (
-                                                            <div className="flex rounded-md">
+                                                            <div className="flex rounded-md" key={idx}>
                                                                 <Image
-                                                                    key={idx}
                                                                     src={imgUrl}
                                                                     width={100}
                                                                     height={100}
