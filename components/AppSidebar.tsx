@@ -31,6 +31,10 @@ function AppSidebar() {
                 {
                     title: 'List',
                     url: '/products/list'
+                },
+                {
+                    title: "Bin",
+                    url: '/products/bin'
                 }
             ]
         },
