@@ -2,6 +2,15 @@ import api from "@/lib/axios.config";
 import { NewProduct, ProductStatus } from "@/types/product.types";
 import { AxiosError } from "axios";
 
+type GetProductsParams = {
+    category?: string;
+    minPrice?: number;
+    maxPrice?: number;
+    search?: string;
+    page?: number;
+    limit?: number;
+};
+
 export async function createProduct(createProductData: NewProduct & { productStatus: ProductStatus }) {
     try {
         const reqUrl = 'products';
@@ -43,9 +52,17 @@ export async function createProduct(createProductData: NewProduct & { productSta
     }
 }
 
-export async function getProducts() {
+export async function getProducts(params: GetProductsParams) {
+    const query = new URLSearchParams(
+        Object.entries(params).reduce((acc, [key, value]) => {
+            if (value !== undefined && value !== '' && value !== 0) {
+                acc[key] = String(value);
+            }
+            return acc;
+        }, {} as Record<string, string>)
+    ).toString();
     try {
-        const reqUrl = `products`;
+        const reqUrl = `products?${query}`;
         const result = await api.get(reqUrl);
         return result;
     } catch (err) {
@@ -115,10 +132,10 @@ export async function deleteProductById(productId: string) {
 export async function uploadProductsExcelSheet(file: File) {
     try {
         const reqUrl = `products/bulk-upload`;
-        
+
         const formData = new FormData();
         formData.append('file', file);
-        
+
         const response = await api.post(reqUrl, formData);
         return response;
     } catch (err) {

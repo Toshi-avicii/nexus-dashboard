@@ -94,7 +94,7 @@ function CategoryForm({ action, category }: { action: FormType, category?: Exist
 
     return (
         <form onSubmit={form.handleSubmit(handleSubmit)}>
-            <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-6 font-quickSand">
                 {/* name */}
                 <Controller
                     control={form.control}

@@ -173,7 +173,7 @@ export const productTableCols: ColumnDef<FetchedProduct>[] = [
         cell: ({ row }) => {
             const firstImage = row.original.images[0];
             if (firstImage) return (
-                <Image src={firstImage} width={48} height={48} className="rounded-sm align-middle" alt={row.original.name} />
+                <img crossOrigin="anonymous" src={firstImage} width={48} height={48} className="rounded-sm align-middle" alt={row.original.name} />
             )
             else return "N/A";
         }

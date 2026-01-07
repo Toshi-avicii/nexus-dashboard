@@ -5,15 +5,34 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { DataTable } from "./table/data-table";
 import { productTableCols } from "@/app/products/list/product-table-columns";
 import { toast } from "sonner";
+import { useState } from "react";
 
 function ProductsTable() {
+    const [pagination, setPagination] = useState({
+        page: 1,
+        limit: 5,
+    });
+
     const queryClient = useQueryClient();
     const productListQuery = useQuery({
-        queryKey: ['get-product-list'],
+        queryKey: ['get-product-list', {
+            category: '',
+            minPrice: 0,
+            search: '',
+            page: pagination.page,
+            limit: pagination.limit,
+        },],
         queryFn: async () => {
-            const data = await getProducts();
+            const data = await getProducts({
+                category: '',
+                minPrice: 0,
+                search: '',
+                page: pagination.page,
+                limit: pagination.limit,
+            });
             return data;
         },
+        placeholderData: (previousData) => previousData
     });
 
     const uploadBulkProductMutation = useMutation({
@@ -24,7 +43,16 @@ function ProductsTable() {
         onSuccess(data) {
             if (data) {
                 toast.dismiss('upload-bulk-product-toast');
-                toast.success(data.data.message);
+                let toastMsg = '';
+                if (data.data.data.rejectedRows.length) {
+                    data.data.data.rejectedRows.forEach((rejectedRow: any, index: number) => {
+                        if(index < 10) toastMsg += ` ${rejectedRow.error} at row no. ${rejectedRow.rowNo}`;
+                    })
+
+                }
+
+                toast.success(`${data.data.message}`);
+                if(toastMsg.length > 0) toast.error(toastMsg);
                 queryClient.invalidateQueries({ queryKey: ['get-product-list'] });
             }
         },
@@ -39,12 +67,25 @@ function ProductsTable() {
             <DataTable
                 isLoading={productListQuery.isFetching || productListQuery.isLoading}
                 columns={productTableCols}
-                data={productListQuery.data?.data.data || []}
+                data={(!productListQuery.isFetching && !productListQuery.isLoading) ? productListQuery.data?.data.data : []}
+                meta={((!productListQuery.isFetching && !productListQuery.isLoading)) && productListQuery.data?.data.meta}
+                onPaginationChange={({ pageIndex, pageSize }) => {
+                    setPagination({
+                        page: pageIndex + 1,
+                        limit: pageSize,
+                    });
+                }}
             >
                 <DataTable.Toolbar>
                     <DataTable.Search />
-                    <DataTable.BulkUpload 
-                        onUpload={uploadBulkProductMutation.mutate} 
+                    <DataTable.BulkUpload
+                        onUpload={uploadBulkProductMutation.mutate}
+                        isLoading={uploadBulkProductMutation.isPending}
+                    />
+                    <DataTable.BulkDelete 
+                        onDelete={(ids: string[]) => {
+                            console.log(ids);
+                        }}
                     />
                 </DataTable.Toolbar>
 
