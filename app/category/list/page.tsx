@@ -53,7 +53,7 @@ function CategoryListPage() {
         </BreadcrumbList>
       </Breadcrumb>
 
-      <div className='my-4'>
+      <div className='my-4 font-quickSand'>
         <DataTable columns={columns} data={categoryListQuery.data?.data?.data || []} isLoading={categoryListQuery.isLoading || categoryListQuery.isFetching}>
           <DataTable.Toolbar>
             <DataTable.Search />

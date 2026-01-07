@@ -1,26 +1,24 @@
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { deleteCategory, getCategoryById } from "@/helpers/category.helpers";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ColumnDef } from "@tanstack/react-table";
-import { ChevronDown, ChevronUp, Edit, Eye, Info, Pencil, Trash } from "lucide-react";
-import { useEffect, useState } from "react";
+import { ArchiveRestore, ChevronDown, ChevronUp, Eye, Info, Trash } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { Checkbox } from "@/components/ui/checkbox";
 import { FetchedProduct } from "@/types/product.types";
-import Image from "next/image";
 import { generateInrAmount } from "@/utils/generateInrAmount";
 import clsx from "clsx";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import CreateNewProduct from "../create/create-new-product";
-import { deleteProductById } from "@/helpers/product.helpers";
+import { moveProductFromBin, permanentlyDeleteProductById } from "@/helpers/product.helpers";
 
 function RowAction({ productRow }: { productRow: FetchedProduct }) {
-    const [dialogType, setDialogType] = useState<'view' | 'edit' | 'delete' | null>(null);
+    const [dialogType, setDialogType] = useState<'view' | 'move' | 'delete' | null>(null);
     const queryClient = useQueryClient();
-    const deleteProductMutation = useMutation({
-        mutationFn: deleteProductById,
+    const permanentlyDeleteProduct = useMutation({
+        mutationFn: permanentlyDeleteProductById,
         onMutate() {
             toast.loading('Sending...', { id: 'product-delete-toast' });
         },
@@ -29,7 +27,7 @@ function RowAction({ productRow }: { productRow: FetchedProduct }) {
                 toast.dismiss('product-delete-toast');
                 toast.success(data.data.message);
                 setDialogType(null);
-                queryClient.invalidateQueries({ queryKey: ['get-product-list'] });
+                queryClient.invalidateQueries({ queryKey: ['get-bin'] });
             }
         },
         onError(error) {
@@ -37,6 +35,27 @@ function RowAction({ productRow }: { productRow: FetchedProduct }) {
             toast.error(error.message);
         },
     });
+
+    const moveProductFromBinMutation = useMutation({
+        mutationFn: moveProductFromBin,
+        onMutate() {
+            toast.loading('Sending...', { id: 'product-delete-toast' });
+        },
+        onSuccess(data) {
+            if (data) {
+                console.log({ data })
+                toast.dismiss('product-delete-toast');
+                toast.success("Product moved from bin successfully");
+                setDialogType(null);
+                queryClient.invalidateQueries({ queryKey: ['get-bin'] });
+            }
+        },
+        onError(error) {
+            toast.dismiss('product-delete-toast');
+            toast.error(error.message);
+        },
+    });
+
     return (
         <Dialog open={dialogType !== null} onOpenChange={(open) => !open && setDialogType(null)}>
             <div className='space-x-4 flex items-center'>
@@ -65,17 +84,17 @@ function RowAction({ productRow }: { productRow: FetchedProduct }) {
                     <Tooltip>
                         <TooltipTrigger asChild>
                             <Button
-                                onClick={() => setDialogType("edit")}
+                                onClick={() => setDialogType("move")}
                                 variant="secondary"
                                 type="button"
                                 size="icon-sm"
-                                className="cursor-pointer"
+                                className="cursor-pointer bg-sky-500 hover:bg-sky-700"
                             >
-                                <Edit size={12} />
+                                 <ArchiveRestore size={12} />
                             </Button>
                         </TooltipTrigger>
                         <TooltipContent>
-                            Edit Product
+                            Move product from bin 
                         </TooltipContent>
                     </Tooltip>
                 </DialogTrigger>
@@ -112,7 +131,7 @@ function RowAction({ productRow }: { productRow: FetchedProduct }) {
                     {/* dialog footer */}
                     <DialogFooter>
                         <Button onClick={() => {
-                            deleteProductMutation.mutate(productRow._id);
+                            permanentlyDeleteProduct.mutate(productRow._id);
                         }}>
                             <Trash />
                             Delete
@@ -122,11 +141,32 @@ function RowAction({ productRow }: { productRow: FetchedProduct }) {
             }
 
             {
-                (dialogType === "edit" || dialogType === 'view') && (
+                dialogType === 'move' &&
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Move Product from bin</DialogTitle>
+                    </DialogHeader>
+                    <div>
+                        <p>Are you sure you want to move this product from bin?</p>
+                    </div>
+                    {/* dialog footer */}
+                    <DialogFooter>
+                        <Button onClick={() => {
+                            moveProductFromBinMutation.mutate(productRow._id);
+                        }}>
+                            <ArchiveRestore />
+                            Move
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            }
+
+            {
+                (dialogType === 'view') && (
                     <DialogContent className="max-h-10/12 flex flex-col overflow-y-auto">
                         <DialogHeader>
                             <DialogTitle>
-                                {dialogType === "edit" ? "Edit" : "View"} Product
+                                View Product
                             </DialogTitle>
                         </DialogHeader>
                         <CreateNewProduct action={dialogType} productData={productRow} />
@@ -137,7 +177,7 @@ function RowAction({ productRow }: { productRow: FetchedProduct }) {
     )
 }
 
-export const productTableCols: ColumnDef<FetchedProduct>[] = [
+export const binnedProductTableCols: ColumnDef<FetchedProduct>[] = [
     {
         id: "select",
         header: ({ table }) => (

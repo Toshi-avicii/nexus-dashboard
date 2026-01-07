@@ -203,12 +203,13 @@ export function NewProductForm({ selectedProduct, selectedProductStatus, product
                                                     productData.images.length > 0 ? productData.images.map((imgUrl, idx) => {
                                                         return (
                                                             <div className="flex rounded-md" key={idx}>
-                                                                <Image
+                                                                <img
                                                                     src={imgUrl}
                                                                     width={100}
                                                                     height={100}
                                                                     alt={productData.name}
                                                                     className="w-full rounded-sm object-cover"
+                                                                    crossOrigin="anonymous"
                                                                 />
                                                             </div>
                                                         )

@@ -13,7 +13,7 @@ interface DataTableBulkUploadProps {
 
 function DataTableBulkUpload({ 
     onUpload,
-    accept='.xls,.xlsx',
+    accept = '.xls,.xlsx',
     allowedTypes = [
         "application/vnd.ms-excel",
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -58,7 +58,7 @@ function DataTableBulkUpload({
                         }}
                     >
                         {
-                            isLoading ? <Loader2 /> : <Upload />
+                            isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload />
                         }
                     </Button>
                 </TooltipTrigger>

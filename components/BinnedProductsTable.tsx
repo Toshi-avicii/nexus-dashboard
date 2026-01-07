@@ -1,21 +1,21 @@
 'use client';
 
-import { getProducts, moveManyProductsToBin, uploadProductsExcelSheet } from "@/helpers/product.helpers";
+import { getBin, permanentlyDeleteManyProducts } from "@/helpers/product.helpers";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { DataTable } from "./table/data-table";
-import { productTableCols } from "@/app/products/list/product-table-columns";
-import { toast } from "sonner";
 import { useState } from "react";
+import { binnedProductTableCols } from "@/app/products/bin/products-bin-table-columns";
+import { toast } from "sonner";
 
-function ProductsTable() {
+function BinnedProductsTable() {
     const [pagination, setPagination] = useState({
         page: 1,
         limit: 5,
     });
-
     const queryClient = useQueryClient();
+
     const productListQuery = useQuery({
-        queryKey: ['get-product-list', {
+        queryKey: ['get-bin', {
             category: '',
             minPrice: 0,
             search: '',
@@ -23,7 +23,7 @@ function ProductsTable() {
             limit: pagination.limit,
         },],
         queryFn: async () => {
-            const data = await getProducts({
+            const data = await getBin({
                 category: '',
                 minPrice: 0,
                 search: '',
@@ -35,43 +35,16 @@ function ProductsTable() {
         placeholderData: (previousData) => previousData
     });
 
-    const uploadBulkProductMutation = useMutation({
-        mutationFn: uploadProductsExcelSheet,
+    const permanentlyDeleteManyProductsMutation = useMutation({
+        mutationFn: permanentlyDeleteManyProducts,
         onMutate() {
-            toast.loading('Sending...', { id: 'upload-bulk-product-toast' });
-        },
-        onSuccess(data) {
-            if (data) {
-                toast.dismiss('upload-bulk-product-toast');
-                let toastMsg = '';
-                if (data.data.data.rejectedRows.length) {
-                    data.data.data.rejectedRows.forEach((rejectedRow: any, index: number) => {
-                        if (index < 10) toastMsg += ` ${rejectedRow.error} at row no. ${rejectedRow.rowNo}`;
-                    })
-
-                }
-
-                toast.success(`${data.data.message}`);
-                if (toastMsg.length > 0) toast.error(toastMsg);
-                queryClient.invalidateQueries({ queryKey: ['get-product-list'] });
-            }
-        },
-        onError(error) {
-            toast.dismiss('upload-bulk-product-toast');
-            toast.error(error.message);
-        },
-    });
-
-    const softDeleteManyProducts = useMutation({
-        mutationFn: moveManyProductsToBin,
-        onMutate() {
-            toast.loading('Sending...', { id: 'move-bulk-product-toast' });
+            toast.loading('Deleting...', { id: 'move-bulk-product-toast' });
         },
         onSuccess(data) {
             if (data) {
                 toast.dismiss('move-bulk-product-toast');
                 toast.success(`${data.data.message}`);
-                queryClient.invalidateQueries({ queryKey: ['get-product-list'] });
+                queryClient.invalidateQueries({ queryKey: ['get-bin'] });
             }
         },
         onError(error) {
@@ -84,7 +57,7 @@ function ProductsTable() {
         <div className="font-quickSand">
             <DataTable
                 isLoading={productListQuery.isFetching || productListQuery.isLoading}
-                columns={productTableCols}
+                columns={binnedProductTableCols}
                 data={(!productListQuery.isFetching && !productListQuery.isLoading) ? productListQuery.data?.data.data : []}
                 meta={((!productListQuery.isFetching && !productListQuery.isLoading)) && productListQuery.data?.data.meta}
                 onPaginationChange={({ pageIndex, pageSize }) => {
@@ -96,13 +69,9 @@ function ProductsTable() {
             >
                 <DataTable.Toolbar>
                     <DataTable.Search />
-                    <DataTable.BulkUpload
-                        onUpload={uploadBulkProductMutation.mutate}
-                        isLoading={uploadBulkProductMutation.isPending}
-                    />
-                    <DataTable.BulkDelete
+                    <DataTable.BulkDelete 
                         onDelete={(ids: string[]) => {
-                            softDeleteManyProducts.mutate(ids);
+                            permanentlyDeleteManyProductsMutation.mutate(ids);
                         }}
                     />
                 </DataTable.Toolbar>
@@ -114,4 +83,4 @@ function ProductsTable() {
     )
 }
 
-export default ProductsTable
+export default BinnedProductsTable

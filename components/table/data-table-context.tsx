@@ -10,6 +10,12 @@ type DataTableContextValue<TData extends WithId> = {
   selectedIds: string[];
   columns: ColumnDef<TData>[];
   isLoading?: boolean;
+  meta?: {
+    limit: number;
+    page: number;
+    total: number;
+    totalPages: number;
+  }
 }
 
 export const DataTableContext = React.createContext<DataTableContextValue<any> | null>(null)
