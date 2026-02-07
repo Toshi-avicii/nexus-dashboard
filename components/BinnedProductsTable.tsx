@@ -4,7 +4,7 @@ import { getBin, permanentlyDeleteManyProducts } from "@/helpers/product.helpers
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { DataTable } from "./table/data-table";
 import { useState } from "react";
-import { binnedProductTableCols } from "@/app/products/bin/products-bin-table-columns";
+import { binnedProductTableCols } from "@/app/admin/products/bin/products-bin-table-columns";
 import { toast } from "sonner";
 
 function BinnedProductsTable() {

@@ -3,7 +3,7 @@
 import { getProducts, moveManyProductsToBin, uploadProductsExcelSheet } from "@/helpers/product.helpers";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { DataTable } from "./table/data-table";
-import { productTableCols } from "@/app/products/list/product-table-columns";
+import { productTableCols } from "@/app/admin/products/list/product-table-columns";
 import { toast } from "sonner";
 import { useState } from "react";
 

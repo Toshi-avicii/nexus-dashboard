@@ -15,7 +15,7 @@ import { CircleX, CloudUpload, Plus, X } from "lucide-react";
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "./ui/input-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { FetchedCategory } from "@/types/category.types";
-import { MetaField, OptionField, VariantField } from "@/app/products/create/others";
+import { MetaField, OptionField, VariantField } from "@/app/admin/products/create/others";
 import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";

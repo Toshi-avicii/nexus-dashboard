@@ -5,6 +5,8 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import StoreProvider from "@/components/StoreProvider";
 import QueryProvider from "@/components/QueryProvider";
 import { Toaster } from "sonner";
+import Script from "next/script";
+
 
 const quickSand = Quicksand({
   variable: "--font-quicksand",
@@ -38,6 +40,10 @@ export default function RootLayout({
           <StoreProvider>
             <QueryProvider>
               {children}
+              <Script
+                src="https://checkout.razorpay.com/v1/checkout.js"
+                strategy="afterInteractive"
+              />
               <Toaster richColors />
             </QueryProvider>
           </StoreProvider>

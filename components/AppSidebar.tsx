@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { Sidebar, SidebarContent, SidebarGroup, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarMenuSub, SidebarMenuSubButton, SidebarMenuSubItem, useSidebar } from './ui/sidebar'
-import { LayoutDashboard, CircleUserRound, ChevronRight, ShoppingBag, ShoppingBasket, ClipboardList } from 'lucide-react'
+import { LayoutDashboard, CircleUserRound, ChevronRight, ShoppingBag, ShoppingBasket, ClipboardList, ShoppingCart } from 'lucide-react'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './ui/collapsible';
 import Link from 'next/link';
 import clsx from 'clsx';
@@ -12,7 +12,7 @@ function AppSidebar() {
     const items = [
         {
             title: "Dashboard",
-            url: "/dashboard",
+            url: "/admin/dashboard",
             isActive: true,
             icon: LayoutDashboard,
             style: {
@@ -21,37 +21,45 @@ function AppSidebar() {
         },
         {
             title: "Products",
-            url: "/products",
+            url: "/admin/products",
             icon: ShoppingBasket,
             items: [
                 {
                     title: 'Create',
-                    url: '/products/create'
+                    url: '/admin/products/create'
                 },
                 {
                     title: 'List',
-                    url: '/products/list'
+                    url: '/admin/products/list'
                 },
                 {
                     title: "Bin",
-                    url: '/products/bin'
+                    url: '/admin/products/bin'
                 }
             ]
         },
         {
             title: "Category",
-            url: "/category",
+            url: "/admin/category",
             icon: ClipboardList,
             items: [
                 {
                     title: 'Create',
-                    url: '/category/create'
+                    url: '/admin/category/create'
                 },
                 {
                     title: 'List',
-                    url: '/category/list'
+                    url: '/admin/category/list'
                 }
             ]
+        },
+        {
+            title: "Orders",
+            url: "/admin/orders",
+            icon: ShoppingCart,
+            style: {
+                fontSize: '20px'
+            }
         }
     ];
 

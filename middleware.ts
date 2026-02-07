@@ -16,7 +16,7 @@ export function middleware(req: NextRequest) {
 
     // if the user is trying to vising an auth route with the access token
     if(accessToken && isAuthRoute) {
-        return NextResponse.redirect(new URL('/dashboard', req.url));
+        return NextResponse.redirect(new URL('/admin/dashboard', req.url));
     }
 
     return NextResponse.next(); // allow access

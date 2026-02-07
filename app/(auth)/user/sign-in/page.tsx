@@ -70,7 +70,7 @@ function SignIn() {
                     username: result.data.user.username
                 }));        
                 toast.dismiss("loading-toast"); 
-                router.replace('/dashboard');
+                router.replace('/admin/dashboard');
             }
         },
         onError: (err) => {
